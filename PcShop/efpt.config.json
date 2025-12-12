@@ -1,0 +1,177 @@
+﻿{
+   "CodeGenerationMode": 5,
+   "ContextClassName": "ExamContext",
+   "ContextNamespace": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "IrregularWords": null,
+   "MinimumProductVersion": "2.6.1224",
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Models",
+   "PluralRules": null,
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "PcShop",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 2,
+   "SelectedToBeGenerated": 0,
+   "SingularRules": null,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "[dbo].[Ads]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AdsReport]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[BrowsingHistory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CartItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Carts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Categories]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Coupons]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FAQCategory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FAQs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Favorite]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[GamePoints]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Games]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LoginHistory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[MemberLevels]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OAuth]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Orders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PaymentLogs_ECPay]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PaymentLogs_LinePay]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PaymentTransactions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PointHistory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Position]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ProductImages]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ProductReport]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ProductReviews]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Products]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ProductSKUs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Records]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[user_questions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserCoupons]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserProfiles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UsersBlackList]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": null,
+   "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDatabaseNamesForRoutines": true,
+   "UseDateOnlyTimeOnly": true,
+   "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
+   "UseSchemaFolders": false,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false,
+   "UseT4Split": false
+}
