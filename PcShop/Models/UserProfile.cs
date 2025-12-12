@@ -9,9 +9,6 @@ public partial class UserProfile
 {
     public int UserId { get; set; }
 
-    public bool ProfileCompleted { get; set; }
-    public string? Provider { get; set; }
-
     public string FullName { get; set; }
 
     public string Phone { get; set; }
@@ -45,6 +42,10 @@ public partial class UserProfile
     public decimal? TotalSpending { get; set; }
 
     public string Salt { get; set; }
+
+    public string Provider { get; set; }
+
+    public bool ProfileCompleted { get; set; }
 
     public virtual ICollection<BrowsingHistory> BrowsingHistories { get; set; } = new List<BrowsingHistory>();
 

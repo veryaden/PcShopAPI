@@ -83,7 +83,6 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.AdId).HasName("PK__Ads__7130D5AEEC3D3D26");
 
-            entity.Property(e => e.AdId).ValueGeneratedNever();
             entity.Property(e => e.EndTime).HasColumnType("datetime");
             entity.Property(e => e.LinkUrl)
                 .HasMaxLength(255)
@@ -110,8 +109,6 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("AdsReport");
 
-            entity.Property(e => e.StatId).ValueGeneratedNever();
-
             entity.HasOne(d => d.Ad).WithMany(p => p.AdsReports)
                 .HasForeignKey(d => d.AdId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -124,15 +121,15 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("BrowsingHistory");
 
-            entity.Property(e => e.BrowsingHistoryId)
-                .ValueGeneratedNever()
-                .HasColumnName("BrowsingHistoryID");
+            entity.Property(e => e.BrowsingHistoryId).HasColumnName("BrowsingHistoryID");
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
             entity.Property(e => e.Url)
                 .IsRequired()
                 .HasColumnName("URL");
             entity.Property(e => e.UserId).HasColumnName("UserID");
-            entity.Property(e => e.VisitTime).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.VisitTime)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__BrowsingH__Visit__481BA567");
 
             entity.HasOne(d => d.Product).WithMany(p => p.BrowsingHistories)
                 .HasForeignKey(d => d.ProductId)
@@ -148,14 +145,20 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.CartId).HasName("PK__Carts__51BCD797E625D43C");
 
-            entity.Property(e => e.CartId).HasColumnName("CartID");
+            entity.Property(e => e.CartId)
+                .HasComment("購物車ID")
+                .HasColumnName("CartID");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysdatetime())")
+                .HasComment("建立時間")
                 .HasColumnType("datetime");
             entity.Property(e => e.LastModifiedAt)
                 .HasDefaultValueSql("(sysdatetime())")
+                .HasComment("最後修改時間")
                 .HasColumnType("datetime");
-            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.UserId)
+                .HasComment("所屬用戶ID (未登入訪客為 NULL)")
+                .HasColumnName("UserID");
 
             entity.HasOne(d => d.User).WithMany(p => p.Carts)
                 .HasForeignKey(d => d.UserId)
@@ -167,10 +170,15 @@ public partial class ExamContext : DbContext
             entity.HasKey(e => e.CartItemId).HasName("PK__CartItem__488B0B2A4D1195C2");
 
             entity.Property(e => e.CartItemId)
-                .ValueGeneratedNever()
+                .HasComment("購物車項目ID")
                 .HasColumnName("CartItemID");
-            entity.Property(e => e.CartId).HasColumnName("CartID");
-            entity.Property(e => e.Skuid).HasColumnName("SKUID");
+            entity.Property(e => e.CartId)
+                .HasComment("所屬購物車ID")
+                .HasColumnName("CartID");
+            entity.Property(e => e.Quantity).HasComment("項目數量");
+            entity.Property(e => e.Skuid)
+                .HasComment("商品規格ID")
+                .HasColumnName("SKUID");
 
             entity.HasOne(d => d.Cart).WithMany(p => p.CartItems)
                 .HasForeignKey(d => d.CartId)
@@ -187,9 +195,7 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A2B0564CE38");
 
-            entity.Property(e => e.CategoryId)
-                .ValueGeneratedNever()
-                .HasColumnName("CategoryID");
+            entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
             entity.Property(e => e.CategoryName)
                 .IsRequired()
                 .HasMaxLength(100);
@@ -199,9 +205,7 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.CouponId).HasName("PK__Coupons__384AF1DA47477C99");
 
-            entity.Property(e => e.CouponId)
-                .ValueGeneratedNever()
-                .HasColumnName("CouponID");
+            entity.Property(e => e.CouponId).HasColumnName("CouponID");
             entity.Property(e => e.CouponCode)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -214,18 +218,20 @@ public partial class ExamContext : DbContext
 
         modelBuilder.Entity<Faq>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__FAQs__3213E83FBBAC9583");
+            entity.HasKey(e => e.Faqid).HasName("PK__FAQs__3213E83FBBAC9583");
 
             entity.ToTable("FAQs");
 
-            entity.Property(e => e.Id)
+            entity.Property(e => e.Faqid)
                 .ValueGeneratedNever()
-                .HasColumnName("id");
+                .HasColumnName("FAQid");
             entity.Property(e => e.Answer)
                 .IsRequired()
                 .HasColumnType("text")
                 .HasColumnName("answer");
-            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.CategoryId)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("category_id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
@@ -241,18 +247,17 @@ public partial class ExamContext : DbContext
 
             entity.HasOne(d => d.Category).WithMany(p => p.Faqs)
                 .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_FAQs_FAQCategory");
         });
 
         modelBuilder.Entity<Faqcategory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Category__3213E83FA4DDF331");
+            entity.HasKey(e => e.Faqcategoryid).HasName("PK__Category__3213E83FA4DDF331");
 
             entity.ToTable("FAQCategory");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Faqcategoryid).HasColumnName("FAQCategoryid");
             entity.Property(e => e.CategoryName)
                 .IsRequired()
                 .HasMaxLength(255)
@@ -265,9 +270,13 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("Favorite");
 
-            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.UserId)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("UserID");
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
-            entity.Property(e => e.AddDate).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.AddDate)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__Favorite__AddDat__04308F6E");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Favorites)
                 .HasForeignKey(d => d.ProductId)
@@ -284,7 +293,6 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.GameId).HasName("PK__Games__2AB897FD948FD13A");
 
-            entity.Property(e => e.GameId).ValueGeneratedNever();
             entity.Property(e => e.Description)
                 .IsRequired()
                 .HasColumnType("text");
@@ -299,7 +307,6 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.UserPointId).HasName("PK__GamePoin__9F29502E2A4F2EA1");
 
-            entity.Property(e => e.UserPointId).ValueGeneratedNever();
             entity.Property(e => e.ExpiredAt).HasColumnType("datetime");
             entity.Property(e => e.ObtainedAt).HasColumnType("datetime");
             entity.Property(e => e.Source)
@@ -336,9 +343,7 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.LevelId).HasName("PK__MemberLe__09F03C06C890B5E3");
 
-            entity.Property(e => e.LevelId)
-                .ValueGeneratedNever()
-                .HasColumnName("LevelID");
+            entity.Property(e => e.LevelId).HasColumnName("LevelID");
             entity.Property(e => e.DiscountRate).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.LevelName)
                 .IsRequired()
@@ -357,9 +362,7 @@ public partial class ExamContext : DbContext
 
             entity.HasIndex(e => new { e.UserId, e.Provider }, "UQ_OAuth").IsUnique();
 
-            entity.Property(e => e.OauthId)
-                .ValueGeneratedNever()
-                .HasColumnName("OAuthID");
+            entity.Property(e => e.OauthId).HasColumnName("OAuthID");
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.LastLoginAt).HasColumnType("datetime");
             entity.Property(e => e.Provider)
@@ -384,31 +387,43 @@ public partial class ExamContext : DbContext
             entity.HasIndex(e => e.OrderNo, "UQ_OrderNo").IsUnique();
 
             entity.Property(e => e.OrderId)
-                .ValueGeneratedNever()
+                .HasComment("訂單ID")
                 .HasColumnName("OrderID");
             entity.Property(e => e.CreateDate)
                 .HasDefaultValueSql("(sysdatetime())")
+                .HasComment("下單時間")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__Orders__CreateDa__73FA27A5")
                 .HasColumnType("datetime");
             entity.Property(e => e.OrderNo)
                 .IsRequired()
                 .HasMaxLength(20)
-                .IsUnicode(false);
-            entity.Property(e => e.OrderStatus)
-                .IsRequired()
-                .HasMaxLength(50);
+                .IsUnicode(false)
+                .HasComment("訂單單號");
+            entity.Property(e => e.OrderStatus).HasComment("訂單狀態,用數字表示");
             entity.Property(e => e.SelectedGateway)
                 .HasMaxLength(20)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasComment("選擇的金流");
             entity.Property(e => e.SelectedPayment)
                 .HasMaxLength(20)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasComment("選擇的付款方式");
             entity.Property(e => e.ShippingAddress)
                 .IsRequired()
-                .HasMaxLength(500);
-            entity.Property(e => e.ShippingMethodId).HasColumnName("ShippingMethodID");
-            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.UpdateDate).HasColumnType("datetime");
-            entity.Property(e => e.UserId).HasColumnName("UserID");
+                .HasMaxLength(500)
+                .HasComment("寄送地址");
+            entity.Property(e => e.ShippingMethodId)
+                .HasComment("配送方式ID")
+                .HasColumnName("ShippingMethodID");
+            entity.Property(e => e.TotalAmount)
+                .HasComment("訂單總金額")
+                .HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.UpdateDate)
+                .HasComment("最後更新時間")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UserId)
+                .HasComment("下單用戶ID")
+                .HasColumnName("UserID");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserId)
@@ -421,11 +436,18 @@ public partial class ExamContext : DbContext
             entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__57ED06A1AEFF04C9");
 
             entity.Property(e => e.OrderItemId)
-                .ValueGeneratedNever()
+                .HasComment("訂單項目ID")
                 .HasColumnName("OrderItemID");
-            entity.Property(e => e.OrderId).HasColumnName("OrderID");
-            entity.Property(e => e.PriceAtPurchase).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.Skuid).HasColumnName("SKUID");
+            entity.Property(e => e.OrderId)
+                .HasComment("所屬訂單ID")
+                .HasColumnName("OrderID");
+            entity.Property(e => e.PriceAtPurchase)
+                .HasComment("實際購買價格 (含折扣)")
+                .HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Quantity).HasComment("購買數量");
+            entity.Property(e => e.Skuid)
+                .HasComment("購買的商品規格ID")
+                .HasColumnName("SKUID");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.OrderId)
@@ -444,9 +466,7 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("PaymentLogs_ECPay");
 
-            entity.Property(e => e.LogId)
-                .ValueGeneratedNever()
-                .HasColumnName("LogID");
+            entity.Property(e => e.LogId).HasColumnName("LogID");
             entity.Property(e => e.BankCode)
                 .HasMaxLength(10)
                 .IsUnicode(false);
@@ -456,6 +476,7 @@ public partial class ExamContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.CreateTime)
                 .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__PaymentLo__Creat__10966653")
                 .HasColumnType("datetime");
             entity.Property(e => e.ExpireDate)
                 .HasMaxLength(20)
@@ -497,9 +518,7 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("PaymentLogs_LinePay");
 
-            entity.Property(e => e.LogId)
-                .ValueGeneratedNever()
-                .HasColumnName("LogID");
+            entity.Property(e => e.LogId).HasColumnName("LogID");
             entity.Property(e => e.ApiAction)
                 .IsRequired()
                 .HasMaxLength(20)
@@ -529,9 +548,7 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.TransactionId).HasName("PK__PaymentT__55433A4BE38B8D55");
 
-            entity.Property(e => e.TransactionId)
-                .ValueGeneratedNever()
-                .HasColumnName("TransactionID");
+            entity.Property(e => e.TransactionId).HasColumnName("TransactionID");
             entity.Property(e => e.Gateway)
                 .IsRequired()
                 .HasMaxLength(20)
@@ -552,6 +569,7 @@ public partial class ExamContext : DbContext
                 .HasMaxLength(50);
             entity.Property(e => e.TransactionTime)
                 .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__PaymentTr__Trans__08F5448B")
                 .HasColumnType("datetime");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
@@ -571,10 +589,10 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("PointHistory");
 
-            entity.Property(e => e.PointHistoryId)
-                .ValueGeneratedNever()
-                .HasColumnName("PointHistoryID");
-            entity.Property(e => e.PointUsedTime).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.PointHistoryId).HasColumnName("PointHistoryID");
+            entity.Property(e => e.PointUsedTime)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__PointHist__Point__300F11AC");
             entity.Property(e => e.Reason).IsRequired();
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
@@ -590,9 +608,7 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("Position");
 
-            entity.Property(e => e.PositionId)
-                .ValueGeneratedNever()
-                .HasColumnName("PositionID");
+            entity.Property(e => e.PositionId).HasColumnName("PositionID");
             entity.Property(e => e.Position1)
                 .IsRequired()
                 .HasMaxLength(50)
@@ -607,15 +623,16 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.ProductId).HasName("PK__Products__B40CC6ED2250A67F");
 
-            entity.Property(e => e.ProductId)
-                .ValueGeneratedNever()
-                .HasColumnName("ProductID");
+            entity.Property(e => e.ProductId).HasColumnName("ProductID");
             entity.Property(e => e.BasePrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__Products__Create__416EA7D8");
             entity.Property(e => e.ProductName)
                 .IsRequired()
                 .HasMaxLength(100);
+            entity.Property(e => e.Status).HasAnnotation("Relational:DefaultConstraintName", "DF__Products__Status__407A839F");
             entity.Property(e => e.WarrantyInfo).HasMaxLength(100);
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
@@ -628,9 +645,7 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.ImageId).HasName("PK__ProductI__7516F4EC9F76C75B");
 
-            entity.Property(e => e.ImageId)
-                .ValueGeneratedNever()
-                .HasColumnName("ImageID");
+            entity.Property(e => e.ImageId).HasColumnName("ImageID");
             entity.Property(e => e.ImageSummary).HasMaxLength(300);
             entity.Property(e => e.ImageUrl)
                 .IsRequired()
@@ -649,11 +664,11 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("ProductReport");
 
-            entity.Property(e => e.ProductReportId)
-                .ValueGeneratedNever()
-                .HasColumnName("ProductReportID");
+            entity.Property(e => e.ProductReportId).HasColumnName("ProductReportID");
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
-            entity.Property(e => e.ReportDate).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.ReportDate)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__ProductRe__Repor__64B7E415");
             entity.Property(e => e.ReportReason)
                 .IsRequired()
                 .HasMaxLength(300);
@@ -677,13 +692,15 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.ReviewId).HasName("PK__ProductR__74BC79AEEC6F9FB1");
 
-            entity.Property(e => e.ReviewId)
-                .ValueGeneratedNever()
-                .HasColumnName("ReviewID");
-            entity.Property(e => e.IsApproved).HasDefaultValue(true);
+            entity.Property(e => e.ReviewId).HasColumnName("ReviewID");
+            entity.Property(e => e.IsApproved)
+                .HasDefaultValue(true)
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__ProductRe__IsApp__7E77B618");
             entity.Property(e => e.OrderItemId).HasColumnName("OrderItemID");
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
-            entity.Property(e => e.ReviewDate).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.ReviewDate)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__ProductRe__Revie__7D8391DF");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
             entity.HasOne(d => d.OrderItem).WithMany(p => p.ProductReviews)
@@ -710,9 +727,8 @@ public partial class ExamContext : DbContext
 
             entity.HasIndex(e => new { e.ProductId, e.Skuname }, "UQ_Product_SKU").IsUnique();
 
-            entity.Property(e => e.Skuid)
-                .ValueGeneratedNever()
-                .HasColumnName("SKUID");
+            entity.Property(e => e.Skuid).HasColumnName("SKUID");
+            entity.Property(e => e.IsOnSale).HasAnnotation("Relational:DefaultConstraintName", "DF__ProductSK__IsOnS__5E0AE686");
             entity.Property(e => e.PriceAdjustment).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
             entity.Property(e => e.Skuname)
@@ -729,8 +745,6 @@ public partial class ExamContext : DbContext
         modelBuilder.Entity<Record>(entity =>
         {
             entity.HasKey(e => e.RecordId).HasName("PK__Records__FBDF78E95A5050A5");
-
-            entity.Property(e => e.RecordId).ValueGeneratedNever();
 
             entity.HasOne(d => d.Game).WithMany(p => p.Records)
                 .HasForeignKey(d => d.GameId)
@@ -749,10 +763,9 @@ public partial class ExamContext : DbContext
 
             entity.HasIndex(e => new { e.UserId, e.CouponId }, "UQ_UserCoupons").IsUnique();
 
-            entity.Property(e => e.UserCouponId)
-                .ValueGeneratedNever()
-                .HasColumnName("UserCouponID");
+            entity.Property(e => e.UserCouponId).HasColumnName("UserCouponID");
             entity.Property(e => e.CouponId).HasColumnName("CouponID");
+            entity.Property(e => e.IsUsed).HasAnnotation("Relational:DefaultConstraintName", "DF__UserCoupo__IsUse__174363E2");
             entity.Property(e => e.UsedDate).HasColumnType("datetime");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
@@ -771,29 +784,40 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.UserId).HasName("PK__UserProf__1788CCAC3726BEAC");
 
+            entity.HasIndex(e => e.Phone, "IX_Users_Phone_NotNull")
+                .IsUnique()
+                .HasFilter("([Phone] IS NOT NULL)");
+
             entity.HasIndex(e => e.Mail, "UQ__UserProf__2724B2D1CA631880").IsUnique();
 
-            entity.HasIndex(e => e.Phone, "UQ__UserProf__5C7E359E57A34E4C").IsUnique();
-
-            entity.Property(e => e.UserId)
-                .ValueGeneratedNever()
-                .HasColumnName("UserID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.Address).HasMaxLength(255);
-            entity.Property(e => e.CreateTime).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.CreateTime)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__UserProfi__Creat__39CD8610");
             entity.Property(e => e.FullName)
                 .IsRequired()
                 .HasMaxLength(50);
             entity.Property(e => e.ImageUrl).HasMaxLength(255);
-            entity.Property(e => e.Is2Faeverified).HasColumnName("Is2FAEVerified");
-            entity.Property(e => e.LevelId).HasColumnName("LevelID");
+            entity.Property(e => e.Is2Faeverified)
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__UserProfi__Is2FA__3BB5CE82")
+                .HasColumnName("Is2FAEVerified");
+            entity.Property(e => e.IsMailVerified).HasAnnotation("Relational:DefaultConstraintName", "DF__UserProfi__IsMai__3AC1AA49");
+            entity.Property(e => e.LevelId)
+                .HasAnnotation("Relational:DefaultConstraintName", "DF_UserProfiles_LevelID")
+                .HasColumnName("LevelID");
             entity.Property(e => e.Mail)
                 .IsRequired()
                 .HasMaxLength(255);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.Phone).HasMaxLength(50);
+            entity.Property(e => e.ProfileCompleted).HasAnnotation("Relational:DefaultConstraintName", "DF__UserProfi__Profi__544C7222");
+            entity.Property(e => e.Provider).HasMaxLength(50);
             entity.Property(e => e.Salt).HasMaxLength(150);
             entity.Property(e => e.ShippingAddress).HasMaxLength(255);
-            entity.Property(e => e.Status).HasDefaultValue((byte)1);
+            entity.Property(e => e.Status)
+                .HasDefaultValue((byte)1)
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__UserProfi__Statu__3CA9F2BB");
             entity.Property(e => e.TotalSpending).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Level).WithMany(p => p.UserProfiles)
@@ -808,9 +832,7 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("user_questions");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Answer)
                 .HasColumnType("text")
                 .HasColumnName("answer");
@@ -847,15 +869,17 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("UsersBlackList");
 
-            entity.Property(e => e.BlacklistId)
-                .ValueGeneratedNever()
-                .HasColumnName("BlacklistID");
+            entity.Property(e => e.BlacklistId).HasColumnName("BlacklistID");
             entity.Property(e => e.BlockedById).HasColumnName("BlockedByID");
-            entity.Property(e => e.BlockedTime).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.BlockedTime)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__UsersBlac__Block__4CE05A84");
             entity.Property(e => e.Reason)
                 .IsRequired()
                 .HasMaxLength(255);
-            entity.Property(e => e.Status).HasDefaultValue((byte)1);
+            entity.Property(e => e.Status)
+                .HasDefaultValue((byte)1)
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__UsersBlac__Statu__4DD47EBD");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
             entity.HasOne(d => d.BlockedBy).WithMany(p => p.UsersBlackListBlockedBies)

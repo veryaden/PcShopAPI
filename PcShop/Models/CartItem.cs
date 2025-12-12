@@ -7,12 +7,24 @@ namespace PcShop.Models;
 
 public partial class CartItem
 {
+    /// <summary>
+    /// 購物車項目ID
+    /// </summary>
     public int CartItemId { get; set; }
 
+    /// <summary>
+    /// 所屬購物車ID
+    /// </summary>
     public int CartId { get; set; }
 
+    /// <summary>
+    /// 商品規格ID
+    /// </summary>
     public int Skuid { get; set; }
 
+    /// <summary>
+    /// 項目數量
+    /// </summary>
     public int Quantity { get; set; }
 
     public virtual Cart Cart { get; set; }

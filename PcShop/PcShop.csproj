@@ -18,4 +18,8 @@
     <Folder Include="Areas\Users\Views\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="efpt.config.json.user" />
+  </ItemGroup>
+
 </Project>

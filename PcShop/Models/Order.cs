@@ -7,26 +7,59 @@ namespace PcShop.Models;
 
 public partial class Order
 {
+    /// <summary>
+    /// 訂單ID
+    /// </summary>
     public int OrderId { get; set; }
 
+    /// <summary>
+    /// 下單用戶ID
+    /// </summary>
     public int UserId { get; set; }
 
+    /// <summary>
+    /// 配送方式ID
+    /// </summary>
     public int ShippingMethodId { get; set; }
 
+    /// <summary>
+    /// 訂單單號
+    /// </summary>
     public string OrderNo { get; set; }
 
+    /// <summary>
+    /// 訂單總金額
+    /// </summary>
     public decimal TotalAmount { get; set; }
 
+    /// <summary>
+    /// 寄送地址
+    /// </summary>
     public string ShippingAddress { get; set; }
 
-    public string OrderStatus { get; set; }
+    /// <summary>
+    /// 訂單狀態,用數字表示
+    /// </summary>
+    public int OrderStatus { get; set; }
 
+    /// <summary>
+    /// 下單時間
+    /// </summary>
     public DateTime CreateDate { get; set; }
 
+    /// <summary>
+    /// 最後更新時間
+    /// </summary>
     public DateTime? UpdateDate { get; set; }
 
+    /// <summary>
+    /// 選擇的金流
+    /// </summary>
     public string SelectedGateway { get; set; }
 
+    /// <summary>
+    /// 選擇的付款方式
+    /// </summary>
     public string SelectedPayment { get; set; }
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();

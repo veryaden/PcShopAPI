@@ -7,9 +7,9 @@ namespace PcShop.Models;
 
 public partial class Faq
 {
-    public long Id { get; set; }
+    public long Faqid { get; set; }
 
-    public int? CategoryId { get; set; }
+    public int CategoryId { get; set; }
 
     public string Question { get; set; }
 

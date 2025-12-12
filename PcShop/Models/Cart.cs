@@ -7,12 +7,24 @@ namespace PcShop.Models;
 
 public partial class Cart
 {
+    /// <summary>
+    /// 購物車ID
+    /// </summary>
     public int CartId { get; set; }
 
+    /// <summary>
+    /// 所屬用戶ID (未登入訪客為 NULL)
+    /// </summary>
     public int? UserId { get; set; }
 
+    /// <summary>
+    /// 建立時間
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 
+    /// <summary>
+    /// 最後修改時間
+    /// </summary>
     public DateTime LastModifiedAt { get; set; }
 
     public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();

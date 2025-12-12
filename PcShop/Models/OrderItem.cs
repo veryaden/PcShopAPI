@@ -7,14 +7,29 @@ namespace PcShop.Models;
 
 public partial class OrderItem
 {
+    /// <summary>
+    /// 訂單項目ID
+    /// </summary>
     public int OrderItemId { get; set; }
 
+    /// <summary>
+    /// 所屬訂單ID
+    /// </summary>
     public int OrderId { get; set; }
 
+    /// <summary>
+    /// 購買的商品規格ID
+    /// </summary>
     public int Skuid { get; set; }
 
+    /// <summary>
+    /// 購買數量
+    /// </summary>
     public int Quantity { get; set; }
 
+    /// <summary>
+    /// 實際購買價格 (含折扣)
+    /// </summary>
     public decimal PriceAtPurchase { get; set; }
 
     public virtual Order Order { get; set; }

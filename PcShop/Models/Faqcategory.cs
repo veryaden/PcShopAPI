@@ -7,7 +7,7 @@ namespace PcShop.Models;
 
 public partial class Faqcategory
 {
-    public int Id { get; set; }
+    public int Faqcategoryid { get; set; }
 
     public string CategoryName { get; set; }
 
