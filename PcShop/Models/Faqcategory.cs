@@ -11,5 +11,15 @@ public partial class Faqcategory
 
     public string CategoryName { get; set; }
 
+    public int? ParentCategoryId { get; set; }
+
+    public int? SortOrder { get; set; }
+
+    public bool IsActive { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual ICollection<Faq> Faqs { get; set; } = new List<Faq>();
 }

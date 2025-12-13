@@ -47,6 +47,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[FAQBlocks]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[FAQCategory]",
          "ObjectType": 0
       },

@@ -23,7 +23,5 @@ public partial class UserQuestion
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual Faq Faq { get; set; }
-
     public virtual UserProfile User { get; set; }
 }

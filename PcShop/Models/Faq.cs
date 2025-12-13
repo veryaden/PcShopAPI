@@ -19,9 +19,9 @@ public partial class Faq
 
     public DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public virtual Faqcategory Category { get; set; }
 
-    public virtual ICollection<UserQuestion> UserQuestions { get; set; } = new List<UserQuestion>();
+    public virtual ICollection<Faqblock> Faqblocks { get; set; } = new List<Faqblock>();
 }

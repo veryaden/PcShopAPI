@@ -29,6 +29,8 @@ public partial class ExamContext : DbContext
 
     public virtual DbSet<Faq> Faqs { get; set; }
 
+    public virtual DbSet<Faqblock> Faqblocks { get; set; }
+
     public virtual DbSet<Faqcategory> Faqcategories { get; set; }
 
     public virtual DbSet<Favorite> Favorites { get; set; }
@@ -222,16 +224,11 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("FAQs");
 
-            entity.Property(e => e.Faqid)
-                .ValueGeneratedNever()
-                .HasColumnName("FAQid");
+            entity.Property(e => e.Faqid).HasColumnName("FAQid");
             entity.Property(e => e.Answer)
                 .IsRequired()
                 .HasColumnType("text")
                 .HasColumnName("answer");
-            entity.Property(e => e.CategoryId)
-                .ValueGeneratedOnAdd()
-                .HasColumnName("category_id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
@@ -251,6 +248,32 @@ public partial class ExamContext : DbContext
                 .HasConstraintName("FK_FAQs_FAQCategory");
         });
 
+        modelBuilder.Entity<Faqblock>(entity =>
+        {
+            entity.HasKey(e => e.FaqblockId).HasName("PK__FAQBlock__356F41B566BA6B34");
+
+            entity.ToTable("FAQBlocks");
+
+            entity.HasIndex(e => new { e.Faqid, e.SortOrder }, "IX_FAQBlocks_FAQid_SortOrder");
+
+            entity.Property(e => e.FaqblockId).HasColumnName("FAQBlockId");
+            entity.Property(e => e.BlockType)
+                .IsRequired()
+                .HasMaxLength(20);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF_FAQBlocks_CreatedAt")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Faqid).HasColumnName("FAQid");
+            entity.Property(e => e.ImageUrl).HasMaxLength(255);
+            entity.Property(e => e.SortOrder).HasAnnotation("Relational:DefaultConstraintName", "DF_FAQBlocks_SortOrder");
+
+            entity.HasOne(d => d.Faq).WithMany(p => p.Faqblocks)
+                .HasForeignKey(d => d.Faqid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FAQBlocks_FAQs");
+        });
+
         modelBuilder.Entity<Faqcategory>(entity =>
         {
             entity.HasKey(e => e.Faqcategoryid).HasName("PK__Category__3213E83FA4DDF331");
@@ -262,6 +285,14 @@ public partial class ExamContext : DbContext
                 .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF_FAQCategory_CreatedAt")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasAnnotation("Relational:DefaultConstraintName", "DF_FAQCategory_IsActive");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Favorite>(entity =>
@@ -852,10 +883,6 @@ public partial class ExamContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("UserID");
-
-            entity.HasOne(d => d.Faq).WithMany(p => p.UserQuestions)
-                .HasForeignKey(d => d.FaqId)
-                .HasConstraintName("FK_UserQuestions_FAQ");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserQuestions)
                 .HasForeignKey(d => d.UserId)
