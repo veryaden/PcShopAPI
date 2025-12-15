@@ -1,9 +1,13 @@
 ﻿using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PcShop.Areas.IUsers.Interface;
+using PcShop.Areas.Users.Data;
+using PcShop.Areas.Users.DTO;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
+using System.Security.Claims;
 
 namespace PcShop.Areas.Users.Controllers
 {
@@ -31,6 +35,30 @@ namespace PcShop.Areas.Users.Controllers
             return Ok(result);
 
         }
+        [Authorize]
+        [HttpPost("complete-profile")]
+        public IActionResult CompleteProfile([FromBody] CompleteProfileRequestDTO dto)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            _bus.CompleteProfile(userId, dto);
+
+            return Ok();
+        }
+
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] RegisterRequestDTO dto)
+        {
+            _bus.Register(dto);
+            return Ok();
+        }
+
+
     }
 
     public class GoogleLoginRequest

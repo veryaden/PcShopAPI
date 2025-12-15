@@ -22,6 +22,10 @@ namespace PcShop.Areas.Users.Data
             _context.UserProfiles.Add(user);
             return user;
         }
+        public UserProfile GetUserById(int userId)
+        {
+            return _context.UserProfiles.FirstOrDefault(x => x.UserId == userId);
+        }
 
         public void Save()
         {
