@@ -1,5 +1,9 @@
 using Google;
 using Microsoft.EntityFrameworkCore;
+using PcShop.Areas.Faqs.Repositories;
+using PcShop.Areas.Faqs.Repositories.Interfaces;
+using PcShop.Areas.Faqs.Services;
+using PcShop.Areas.Faqs.Services.Interfaces;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.Controllers;
 using PcShop.Areas.Users.Data;
@@ -36,6 +40,10 @@ builder.Services.AddScoped<IAuthData, AuthData>();
 builder.Services.AddScoped<IAuthBus, AuthBus>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+//Faq Services and Repositories
+builder.Services.AddScoped<IFaqRepository, FaqRepository>();
+//「當有人要 IFaqRepository 時，請給他一個 FaqRepository」
+builder.Services.AddScoped<IFaqService, FaqService>();
 
 var app = builder.Build();
 
