@@ -1,12 +1,7 @@
-﻿using Google.Apis.Auth;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PcShop.Areas.IUsers.Interface;
-using PcShop.Areas.Users.Data;
+using PcShop.Areas.IUsers.Interface; // 修正命名空間
 using PcShop.Areas.Users.DTO;
-using PcShop.Areas.Users.Interface;
-using PcShop.Models;
 using System.Security.Claims;
 
 namespace PcShop.Areas.Users.Controllers
@@ -15,50 +10,82 @@ namespace PcShop.Areas.Users.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _config;
         private readonly IAuthBus _bus;
-        private readonly ExamContext _context; 
 
-        public AuthController(IConfiguration config , IAuthBus bus , ExamContext context)
+        public AuthController(IAuthBus bus)
         {
-            _config = config;
             _bus = bus;
-            _context = context;
         }
 
+        // 需求 3: 普通使用者登入
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO dto)
+        {
+            try
+            {
+                var result = await _bus.LoginAsync(dto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // 需求 1 & 2: Google 登入 (檢測註冊/自動註冊)
         [HttpPost("google-login")]
         public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
         {
-
-            var result = await _bus.GoogleLoginAsync(request.IdToken);
-
-            return Ok(result);
-
+            try
+            {
+                // Service 會回傳 AuthResponseDTO，裡面包含 ProfileCompleted
+                // 前端根據 ProfileCompleted 來決定要跳轉首頁還是填寫資料頁
+                var result = await _bus.GoogleLoginAsync(request.IdToken);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+        // 需求 1 的後半段: Google 用戶填寫完資料後呼叫
         [Authorize]
         [HttpPost("complete-profile")]
-        public IActionResult CompleteProfile([FromBody] CompleteProfileRequestDTO dto)
+        public async Task<IActionResult> CompleteProfile([FromBody] CompleteProfileRequestDTO dto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                // 必須使用 async/await
+                int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                await _bus.CompleteProfileAsync(userId, dto);
+                return Ok(new { message = "資料更新成功" });
             }
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            _bus.CompleteProfile(userId, dto);
-
-            return Ok();
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
+        // 需求 4 的後半段: 本地新用戶註冊
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterRequestDTO dto)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDTO dto)
         {
-            _bus.Register(dto);
-            return Ok();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                // 必須使用 async/await
+                await _bus.RegisterAsync(dto);
+                return Ok(new { message = "註冊成功" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
-
-
     }
 
     public class GoogleLoginRequest

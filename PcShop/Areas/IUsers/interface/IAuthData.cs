@@ -4,11 +4,11 @@ namespace PcShop.Areas.Users.Interface
 {
     public interface IAuthData
     {
-        UserProfile? GetUserByEmail(string email);
-        UserProfile GetUserById(int userId);
-        UserProfile InsertUser(UserProfile user);
+        Task <UserProfile>? GetUserByEmail(string email);
+        Task<UserProfile> GetUserById(int userId);
+        Task <UserProfile> InsertUser(UserProfile user);
 
        
-        void Save();
+        Task SaveAsync();
     }
 }

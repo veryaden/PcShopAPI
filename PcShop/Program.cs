@@ -58,6 +58,7 @@ builder.Services.AddDbContext<ExamContext>(options =>
 
 builder.Services.AddScoped<IAuthData, AuthData>();
 builder.Services.AddScoped<IAuthBus, AuthBus>();
+builder.Services.AddScoped<IOAuthData, OAuthData>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddAuthorization();

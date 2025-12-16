@@ -1,4 +1,5 @@
-﻿using PcShop.Areas.Users.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using PcShop.Areas.Users.Interface;
 using PcShop.Models;
 
 namespace PcShop.Areas.Users.Data
@@ -12,24 +13,26 @@ namespace PcShop.Areas.Users.Data
             _context = context;
         }
 
-        public UserProfile? GetUserByEmail(string email)
+        public async Task<UserProfile>? GetUserByEmail(string email)
         {
-            return _context.UserProfiles.FirstOrDefault(x => x.Mail == email);
+            return await _context.UserProfiles.FirstOrDefaultAsync(x => x.Mail == email);
         }
 
-        public UserProfile InsertUser(UserProfile user)
+        public async Task<UserProfile> InsertUser(UserProfile user)
         {
-            _context.UserProfiles.Add(user);
+            await _context.UserProfiles.AddAsync(user);
             return user;
         }
-        public UserProfile GetUserById(int userId)
+        public async Task<UserProfile> GetUserById(int userId)
         {
-            return _context.UserProfiles.FirstOrDefault(x => x.UserId == userId);
+            return await _context.UserProfiles.FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
-        public void Save()
+
+
+        public async Task SaveAsync()
         {
-            _context.SaveChanges();
+           await _context.SaveChangesAsync();
         }
     }
 }

@@ -12,3 +12,4 @@ public partial class CompleteProfileRequestDTO
     public string ShippingAddress { get; set; }
     public DateTime BirthDay { get; set; }
 }
+
