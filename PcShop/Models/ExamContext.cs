@@ -324,14 +324,11 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.GameId).HasName("PK__Games__2AB897FD948FD13A");
 
-            entity.Property(e => e.Description)
-                .IsRequired()
-                .HasColumnType("text");
+            entity.Property(e => e.Description).HasColumnType("text");
             entity.Property(e => e.GameName)
                 .IsRequired()
                 .HasMaxLength(100)
                 .IsUnicode(false);
-            entity.Property(e => e.GamePicture).IsRequired();
         });
 
         modelBuilder.Entity<GamePoint>(entity =>
@@ -776,6 +773,8 @@ public partial class ExamContext : DbContext
         modelBuilder.Entity<Record>(entity =>
         {
             entity.HasKey(e => e.RecordId).HasName("PK__Records__FBDF78E95A5050A5");
+
+            entity.Property(e => e.PlayedAt).HasColumnType("datetime");
 
             entity.HasOne(d => d.Game).WithMany(p => p.Records)
                 .HasForeignKey(d => d.GameId)
