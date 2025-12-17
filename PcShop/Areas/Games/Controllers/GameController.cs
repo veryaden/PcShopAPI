@@ -17,18 +17,18 @@ namespace PcShop.Areas.Games.Controllers
             _gameService = gameService;
         }
 
-        //[Authorize] // ⭐ 先加上
+        [Authorize] // ⭐ 先加上
         [HttpPost("submit-score")]
         public async Task<IActionResult> SubmitScore(
-    [FromBody] SubmitGameScoreDto dto)
+            [FromBody] SubmitGameScoreDto dto)
         {
             // ⚠️ 暫時假資料（之後 JWT）
-            /*var userIdClaim = User.FindFirst("userId");
+            var userIdClaim = User.FindFirst("userId");
 
-            int userId = userIdClaim != null
+            /*int userId = userIdClaim != null
                 ? int.Parse(userIdClaim.Value)
                 : 1; // ⚠️ JWT 尚未接好前的 fallback
-            */
+              */         
             int userId = 1;
             await _gameService.SubmitScoreAsync(
                 userId,
