@@ -1,4 +1,5 @@
 using Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using PcShop.Areas.Faqs.Repositories;
 using PcShop.Areas.Faqs.Repositories.Interfaces;
@@ -9,11 +10,13 @@ using PcShop.Areas.Games.Repositories;
 using PcShop.Areas.Games.Repositories.Interfaces;
 using PcShop.Areas.Games.Services;
 using PcShop.Areas.Games.Strategies;
+using Microsoft.IdentityModel.Tokens;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.Controllers;
 using PcShop.Areas.Users.Data;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,7 +37,28 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod();
         });
 });
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+        )
+    };
+}); var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 
 builder.Services.AddDbContext<ExamContext>(options =>
@@ -43,8 +67,12 @@ builder.Services.AddDbContext<ExamContext>(options =>
 
 builder.Services.AddScoped<IAuthData, AuthData>();
 builder.Services.AddScoped<IAuthBus, AuthBus>();
+builder.Services.AddScoped<IOAuthData, OAuthData>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+builder.Services.AddAuthorization();
+
+builder.Services.AddControllers();
 
 //Faq Services and Repositories
 builder.Services.AddScoped<IFaqRepository, FaqRepository>();

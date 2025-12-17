@@ -1,7 +1,14 @@
-﻿namespace PcShop.Areas.IUsers.Interface
+﻿using PcShop.Areas.Users.DTO;
+
+namespace PcShop.Areas.IUsers.Interface
 {
     public interface IAuthBus
     {
-        Task<Object> GoogleLoginAsync(string idToken);
+        Task<AuthResponseDTO> LoginAsync(LoginDTO dto);
+
+        Task<AuthResponseDTO> GoogleLoginAsync(string idToken);
+
+        Task CompleteProfileAsync(int userId, CompleteProfileRequestDTO dto);
+        Task RegisterAsync(RegisterRequestDTO dto);
     }
 }
