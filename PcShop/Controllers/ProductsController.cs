@@ -26,13 +26,14 @@ public class ProductsController : ControllerBase
         decimal? maxPrice = null,
         string categories = "")
     {
-        // 加上 Include 以載入關聯資料
+        // 建立查詢，Include 載入相關資料
         var query = _context.Products
             .Include(p => p.Category)
             .Include(p => p.ProductImages)
             .Include(p => p.ProductReviews)
             .AsQueryable();
 
+        // 搜尋條件
         if (!string.IsNullOrEmpty(search))
             query = query.Where(p => p.ProductName.Contains(search));
 
@@ -56,8 +57,10 @@ public class ProductsController : ControllerBase
             _ => query.OrderBy(p => p.ProductName),
         };
 
+        // 計算總筆數，用於分頁
         var totalCount = await query.CountAsync();
 
+        // 取分頁資料並投影成 DTO
         var items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -72,6 +75,17 @@ public class ProductsController : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(new { items, totalItems = totalCount });
+        // ===============================
+        // 主要修改點：使用 ApiResponse<T> 包裝回傳資料
+        // ===============================
+        var response = new ApiResponse<List<ProductListDto>>
+        {
+            Data = items,               // 原本的 items 放在 Data
+            TotalItems = totalCount,    // 分頁總數
+            Message = "成功取得商品列表" // 可選訊息
+        };
+
+        // 回傳統一格式
+        return Ok(response);
     }
 }
