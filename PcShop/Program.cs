@@ -64,7 +64,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddDbContext<ExamContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Exam")));
 
-
 builder.Services.AddScoped<IAuthData, AuthData>();
 builder.Services.AddScoped<IAuthBus, AuthBus>();
 builder.Services.AddScoped<IOAuthData, OAuthData>();
