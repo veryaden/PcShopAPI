@@ -2,7 +2,7 @@
 
 namespace PcShop.Areas.IUsers.Interface
 {
-    public interface IAuthBus
+    public interface IAuthServices
     {
         Task<AuthResponseDTO> LoginAsync(LoginDTO dto);
 

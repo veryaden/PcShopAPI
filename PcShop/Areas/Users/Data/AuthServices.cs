@@ -12,13 +12,13 @@ using System.Security.Claims;
 
 namespace PcShop.Areas.Users.Data
 {
-    public class AuthBus: IAuthBus
+    public class AuthServices: IAuthServices
     {
         private readonly IConfiguration _config;
         private readonly IAuthData _data;
         private readonly IJwtService _jwtService;
         private readonly IOAuthData _oauthData;
-        public AuthBus(IConfiguration config, IAuthData data, IJwtService jwtService , IOAuthData oauthData)
+        public AuthServices(IConfiguration config, IAuthData data, IJwtService jwtService , IOAuthData oauthData)
         {
             _config = config;
             _data = data;
@@ -170,8 +170,7 @@ namespace PcShop.Areas.Users.Data
         private async Task<UserProfile> ValidateLocalLogin(LoginDTO dto)
         {
             // 1️ 用 Email 找使用者
-            var user = await _data.GetUserByEmail(dto.Mail); // 修正：你的方法名可能是 GetUserByEmail
-                                                          // var user = await _data.GetUserByEmail(dto.Mail); 
+            var user = await _data.GetUserByEmail(dto.Mail); 
 
             if (user == null)
                 throw new Exception("帳號或密碼錯誤"); // 避免洩漏帳號是否存在

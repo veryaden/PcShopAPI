@@ -10,9 +10,9 @@ namespace PcShop.Areas.Users.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthBus _bus;
+        private readonly IAuthServices _bus;
 
-        public AuthController(IAuthBus bus)
+        public AuthController(IAuthServices bus)
         {
             _bus = bus;
         }
