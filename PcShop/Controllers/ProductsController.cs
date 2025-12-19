@@ -26,7 +26,6 @@ public class ProductsController : ControllerBase
         decimal? maxPrice = null,
         string categories = "")
     {
-        // 建立查詢，Include 載入相關資料
         var query = _context.Products
             .Include(p => p.Category)
             .Include(p => p.ProductImages)
@@ -46,7 +45,7 @@ public class ProductsController : ControllerBase
         if (!string.IsNullOrEmpty(categories))
         {
             var categoryList = categories.Split(',');
-            query = query.Where(p => categoryList.Contains(p.Category.CategoryName));
+            query = query.Where(p => p.Category != null && categoryList.Contains(p.Category.CategoryName));
         }
 
         // 排序
@@ -57,10 +56,8 @@ public class ProductsController : ControllerBase
             _ => query.OrderBy(p => p.ProductName),
         };
 
-        // 計算總筆數，用於分頁
         var totalCount = await query.CountAsync();
 
-        // 取分頁資料並投影成 DTO
         var items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -68,24 +65,61 @@ public class ProductsController : ControllerBase
             {
                 Id = p.ProductId,
                 Name = p.ProductName,
-                Category = p.Category.CategoryName,
+                Category = p.Category != null ? p.Category.CategoryName : "",
                 Price = p.BasePrice,
                 Rating = p.ProductReviews.Any() ? p.ProductReviews.Average(r => r.Rating) : 0,
                 ImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault().ImageUrl : ""
             })
             .ToListAsync();
 
-        // ===============================
-        // 主要修改點：使用 ApiResponse<T> 包裝回傳資料
-        // ===============================
         var response = new ApiResponse<List<ProductListDto>>
         {
-            Data = items,               // 原本的 items 放在 Data
-            TotalItems = totalCount,    // 分頁總數
-            Message = "成功取得商品列表" // 可選訊息
+            Data = items,
+            TotalItems = totalCount,
+            Message = "成功取得商品列表"
         };
 
-        // 回傳統一格式
         return Ok(response);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetProductDetail(int id)
+    {
+        var product = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.ProductImages)
+            .Include(p => p.ProductReviews)
+            .FirstOrDefaultAsync(p => p.ProductId == id && p.Status == 1);
+
+        if (product == null)
+        {
+            return NotFound(new ApiResponse<string>
+            {
+                Message = "商品不存在或已下架"
+            });
+        }
+
+        // 防止 ProductImages 為 null
+        var images = product.ProductImages != null
+            ? product.ProductImages.Select(i => i.ImageUrl).ToList()
+            : new List<string>();
+
+        var dto = new ProductDetailDto
+        {
+            Id = product.ProductId,
+            Name = product.ProductName,
+            Category = product.Category != null ? product.Category.CategoryName : "",
+            Price = product.BasePrice,
+            Description = product.FullDescription ?? "",
+            WarrantyInfo = product.WarrantyInfo ?? "",
+            Rating = product.ProductReviews.Any() ? product.ProductReviews.Average(r => r.Rating) : 0,
+            Images = images
+        };
+
+        return Ok(new ApiResponse<ProductDetailDto>
+        {
+            Data = dto,
+            Message = "成功取得商品詳情"
+        });
     }
 }
