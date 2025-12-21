@@ -28,7 +28,16 @@ namespace PcShop.Areas.Users.Data
             return await _context.UserProfiles.FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
-
+        public async Task<UserProfile> GetByResetToken(string token)
+        {
+            return await _context.UserProfiles
+           .FirstOrDefaultAsync(u => u.ResetPasswordToken == token);
+        }
+        public async Task<UserProfile> GetByEmailVerifyToken(string token)
+        {
+            return await _context.UserProfiles
+           .FirstOrDefaultAsync(u => u.EmailVerifyToken == token); 
+        }
 
         public async Task SaveAsync()
         {

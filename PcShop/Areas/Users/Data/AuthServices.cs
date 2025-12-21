@@ -4,26 +4,31 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.DTO;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
+using System.Linq.Dynamic.Core;
+using System.Linq.Dynamic.Core.Tokenizer;
 using System.Security.Claims;
 
 namespace PcShop.Areas.Users.Data
 {
-    public class AuthServices: IAuthServices
+    public class AuthServices : IAuthServices
     {
         private readonly IConfiguration _config;
         private readonly IAuthData _data;
         private readonly IJwtService _jwtService;
         private readonly IOAuthData _oauthData;
-        public AuthServices(IConfiguration config, IAuthData data, IJwtService jwtService , IOAuthData oauthData)
+        private readonly ISendEmailService _email;
+        public AuthServices(IConfiguration config, IAuthData data, IJwtService jwtService, IOAuthData oauthData, ISendEmailService email)
         {
             _config = config;
             _data = data;
             _jwtService = jwtService;
             _oauthData = oauthData;
+            _email = email;
         }
 
         private AuthResponseDTO CreateAuthResponse(UserProfile user, string provider)
@@ -114,7 +119,7 @@ namespace PcShop.Areas.Users.Data
         }
 
 
-        private async Task<UserProfile> HandleGoogleOAuthAsync(string email,string name,string googleSub)
+        private async Task<UserProfile> HandleGoogleOAuthAsync(string email, string name, string googleSub)
         {
             const string provider = "Google";
 
@@ -170,7 +175,7 @@ namespace PcShop.Areas.Users.Data
         private async Task<UserProfile> ValidateLocalLogin(LoginDTO dto)
         {
             // 1️ 用 Email 找使用者
-            var user = await _data.GetUserByEmail(dto.Mail); 
+            var user = await _data.GetUserByEmail(dto.Mail);
 
             if (user == null)
                 throw new Exception("帳號或密碼錯誤"); // 避免洩漏帳號是否存在
@@ -200,6 +205,61 @@ namespace PcShop.Areas.Users.Data
                 throw new Exception("帳號已停用");
 
             return user;
+        }
+
+
+        public async Task ForgotPasswordAsync(string mail)
+        {
+            var user = await _data.GetUserByEmail(mail);
+
+            // 不暴露帳號是否存在
+            if (user == null)
+                return;
+
+            user.ResetPasswordToken = Guid.NewGuid().ToString();
+            user.ResetPasswordExpireAt = DateTime.Now.AddHours(1);
+
+            await _data.SaveAsync();
+
+            var link =
+                $"{_config["FrontendUrl"]}/reset-password?token={user.ResetPasswordToken}";
+
+            await _email.SendAsync(
+                user.Mail,
+                "重設密碼",
+                $"請點擊以下連結重設密碼：<a href='{link}'>重設密碼</a>"
+            );
+        }
+
+        // 🔐 重設密碼
+        public async Task ResetPasswordAsync(string token, string newPassword)
+        {
+            var user = await _data.GetByResetToken(token);
+
+            if (user == null || user.ResetPasswordExpireAt < DateTime.Now)
+                throw new Exception("驗證碼無效或已過期");
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.ResetPasswordToken = null;
+            user.ResetPasswordExpireAt = null;
+
+            await _data.SaveAsync();
+        }
+
+        // ✉️ 信箱驗證
+        public async Task VerifyEmailAsync(string token)
+        {
+            var user = await _data.GetByEmailVerifyToken(token);
+
+            if (user == null || user.EmailVerifyExpireAt < DateTime.Now)
+                throw new Exception("驗證連結無效或已過期");
+
+            user.IsMailVerified = 1;
+            user.IsMailVerifiedTime = DateTime.Now;
+            user.EmailVerifyToken = null;
+            user.EmailVerifyExpireAt = null;
+
+            await _data.SaveAsync();
         }
 
 
