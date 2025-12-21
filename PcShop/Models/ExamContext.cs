@@ -637,11 +637,11 @@ public partial class ExamContext : DbContext
             entity.ToTable("Position");
 
             entity.Property(e => e.PositionId).HasColumnName("PositionID");
-            entity.Property(e => e.Position1)
+            entity.Property(e => e.Code)
                 .IsRequired()
                 .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("Position");
+                .IsUnicode(false);
+            entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.Size)
                 .HasMaxLength(50)
                 .IsUnicode(false);

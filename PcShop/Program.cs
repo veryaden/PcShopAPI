@@ -1,5 +1,11 @@
 using Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using PcShop.Areas.Ads.Repositories;
+using PcShop.Areas.Ads.Repositories.Interfaces;
+using PcShop.Areas.Ads.Services;
+using PcShop.Areas.Ads.Services.Interfaces;
 using PcShop.Areas.Faqs.Repositories;
 using PcShop.Areas.Faqs.Repositories.Interfaces;
 using PcShop.Areas.Faqs.Services;
@@ -14,10 +20,8 @@ using PcShop.Areas.Users.Controllers;
 using PcShop.Areas.Users.Data;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,7 +93,9 @@ builder.Services.AddScoped<SnakePointCalculator>();
 // Factory¡]­t³d¡u¿ï½Ö¨Óºâ¡v¡^
 builder.Services.AddScoped<GamePointCalculatorFactory>();
 
-
+builder.Services.AddScoped<IAdRepository, AdRepository>();
+builder.Services.AddScoped<IPositionRepository, PositionRepository>();
+builder.Services.AddScoped<IAdService, AdService>();
 
 
 var app = builder.Build();
@@ -104,6 +110,8 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 
