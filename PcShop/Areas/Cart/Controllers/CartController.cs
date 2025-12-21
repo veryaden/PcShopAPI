@@ -20,7 +20,7 @@ namespace PcShop.Areas.Cart.Controllers
         public IActionResult GetCart()
         {
            var aaa = _cartService.GetCart();
-
+            var qqqq = 1;
             return null;
         }
     }
