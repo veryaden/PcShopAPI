@@ -10,9 +10,9 @@ namespace PcShop.Areas.Users.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthBus _bus;
+        private readonly IAuthServices _bus;
 
-        public AuthController(IAuthBus bus)
+        public AuthController(IAuthServices bus)
         {
             _bus = bus;
         }
@@ -86,6 +86,41 @@ namespace PcShop.Areas.Users.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] EmailDTO dto)
+        {
+            await _bus.ForgotPasswordAsync(dto.Mail);
+            return Ok(new { message = "如果帳號存在，已寄出信件" });
+        }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
+        {
+            try
+            {
+                await _bus.ResetPasswordAsync(dto.Token, dto.NewPassword);
+                return Ok(new { message = "密碼重設成功" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> VerifyEmail(string token)
+        {
+            try
+            {
+                await _bus.VerifyEmailAsync(token);
+                return Ok(new { message = "信箱驗證成功" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+
     }
 
     public class GoogleLoginRequest

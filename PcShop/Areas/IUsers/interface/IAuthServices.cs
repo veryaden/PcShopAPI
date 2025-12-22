@@ -2,7 +2,7 @@
 
 namespace PcShop.Areas.IUsers.Interface
 {
-    public interface IAuthBus
+    public interface IAuthServices
     {
         Task<AuthResponseDTO> LoginAsync(LoginDTO dto);
 
@@ -10,5 +10,9 @@ namespace PcShop.Areas.IUsers.Interface
 
         Task CompleteProfileAsync(int userId, CompleteProfileRequestDTO dto);
         Task RegisterAsync(RegisterRequestDTO dto);
+
+        Task ForgotPasswordAsync(string mail);
+        Task ResetPasswordAsync(string token, string newPassword);
+        Task VerifyEmailAsync(string token);
     }
 }

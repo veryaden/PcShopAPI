@@ -23,6 +23,7 @@ using PcShop.Areas.Users.Interface;
 using PcShop.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -72,9 +73,11 @@ builder.Services.AddDbContext<ExamContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Exam")));
 
 builder.Services.AddScoped<IAuthData, AuthData>();
-builder.Services.AddScoped<IAuthBus, AuthBus>();
+builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<IOAuthData, OAuthData>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<ISendEmailService, SendEmailServices>();
+builder.Services.AddAuthorization();
 
 // Add services to the container.
 builder.Services
