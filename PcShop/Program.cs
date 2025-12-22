@@ -1,6 +1,11 @@
 using Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using PcShop.Areas.Ads.Repositories;
+using PcShop.Areas.Ads.Repositories.Interfaces;
+using PcShop.Areas.Ads.Services;
+using PcShop.Areas.Ads.Services.Interfaces;
 using PcShop.Areas.Faqs.Repositories;
 using PcShop.Areas.Faqs.Repositories.Interfaces;
 using PcShop.Areas.Faqs.Services;
@@ -16,12 +21,14 @@ using PcShop.Areas.Users.Controllers;
 using PcShop.Areas.Users.Data;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -69,9 +76,29 @@ builder.Services.AddScoped<IAuthBus, AuthBus>();
 builder.Services.AddScoped<IOAuthData, OAuthData>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-builder.Services.AddAuthorization();
+// Add services to the container.
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
 
-builder.Services.AddControllers();
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+            ),
+
+            // ? 很重要：把 sub 自動對應成 NameIdentifier
+            NameClaimType = JwtRegisteredClaimNames.Sub
+        };
+    });
 
 //Faq Services and Repositories
 builder.Services.AddScoped<IFaqRepository, FaqRepository>();
@@ -88,7 +115,9 @@ builder.Services.AddScoped<SnakePointCalculator>();
 // Factory（負責「選誰來算」）
 builder.Services.AddScoped<GamePointCalculatorFactory>();
 
-
+builder.Services.AddScoped<IAdRepository, AdRepository>();
+builder.Services.AddScoped<IPositionRepository, PositionRepository>();
+builder.Services.AddScoped<IAdService, AdService>();
 
 
 var app = builder.Build();
@@ -103,6 +132,8 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 
