@@ -1,9 +1,12 @@
-namespace PcShop.DTOs;
-
-public class ProductSkuDto
+namespace PcShop.DTOs
 {
-    public int SkuId { get; set; }
-    public string SkuName { get; set; }    // e.g. ¶Â¦â / 512GB
-    public int Stock { get; set; }
-    public decimal? ExtraPrice { get; set; }
+    public class ProductSkuDto
+    {
+        public int Skuid { get; set; }
+        public string Skuname { get; set; }
+        public int StockQuantity { get; set; }
+        public bool IsOutOfStock { get; set; }
+        public bool IsOnSale { get; set; }
+        public decimal PriceAdjustment { get; set; }
+    }
 }

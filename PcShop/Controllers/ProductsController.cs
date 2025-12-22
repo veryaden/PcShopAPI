@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PcShop.Areas.Users.Data; // ExamContext 所在 namespace
+using PcShop.Areas.Users.Data;
 using PcShop.DTOs;
 using PcShop.Models;
 using System.Linq.Dynamic.Core;
@@ -16,6 +16,9 @@ public class ProductsController : ControllerBase
         _context = context;
     }
 
+    // ---------------------------
+    // 取得商品列表
+    // ---------------------------
     [HttpGet]
     public async Task<IActionResult> GetProducts(
         int page = 1,
@@ -30,9 +33,9 @@ public class ProductsController : ControllerBase
             .Include(p => p.Category)
             .Include(p => p.ProductImages)
             .Include(p => p.ProductReviews)
+            .Where(p => p.Status == 1)
             .AsQueryable();
 
-        // 搜尋條件
         if (!string.IsNullOrEmpty(search))
             query = query.Where(p => p.ProductName.Contains(search));
 
@@ -48,7 +51,6 @@ public class ProductsController : ControllerBase
             query = query.Where(p => p.Category != null && categoryList.Contains(p.Category.CategoryName));
         }
 
-        // 排序
         query = sort switch
         {
             "priceAsc" => query.OrderBy(p => p.BasePrice),
@@ -72,16 +74,17 @@ public class ProductsController : ControllerBase
             })
             .ToListAsync();
 
-        var response = new ApiResponse<List<ProductListDto>>
+        return Ok(new ApiResponse<List<ProductListDto>>
         {
             Data = items,
             TotalItems = totalCount,
             Message = "成功取得商品列表"
-        };
-
-        return Ok(response);
+        });
     }
 
+    // ---------------------------
+    // 取得商品詳細
+    // ---------------------------
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProductDetail(int id)
     {
@@ -99,7 +102,6 @@ public class ProductsController : ControllerBase
             });
         }
 
-        // 防止 ProductImages 為 null
         var images = product.ProductImages != null
             ? product.ProductImages.Select(i => i.ImageUrl).ToList()
             : new List<string>();
@@ -120,6 +122,40 @@ public class ProductsController : ControllerBase
         {
             Data = dto,
             Message = "成功取得商品詳情"
+        });
+    }
+
+    // ---------------------------
+    // 取得單一商品的 SKU 列表
+    // ---------------------------
+    [HttpGet("{productId}/skus")]
+    public async Task<IActionResult> GetProductSkus(int productId)
+    {
+        var skus = await _context.ProductSkus
+            .Where(s => s.ProductId == productId)
+            .Select(s => new ProductSkuDto
+            {
+                Skuid = s.Skuid,
+                Skuname = s.Skuname,
+                StockQuantity = s.StockQuantity,
+                IsOutOfStock = s.StockQuantity <= 0,
+                IsOnSale = s.IsOnSale,
+                PriceAdjustment = s.PriceAdjustment
+            })
+            .ToListAsync();
+
+        if (!skus.Any())
+        {
+            return NotFound(new ApiResponse<string>
+            {
+                Message = "此商品沒有 SKU"
+            });
+        }
+
+        return Ok(new ApiResponse<List<ProductSkuDto>>
+        {
+            Data = skus,
+            Message = "成功取得 SKU 列表"
         });
     }
 }
