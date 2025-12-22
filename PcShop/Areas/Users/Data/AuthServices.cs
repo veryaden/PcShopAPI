@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.DTO;
@@ -83,7 +84,11 @@ namespace PcShop.Areas.Users.Data
             user.Address = dto.Address;
             user.ShippingAddress = dto.ShippingAddress;
             user.BirthDay = dto.BirthDay;
-
+            if(await _oauthData.GetByUserId(userId) != null)
+            {
+                user.IsMailVerified = 1;
+                user.IsMailVerifiedTime = DateTime.Now;
+            }
             user.ProfileCompleted = true;
             user.UpdateTime = DateTime.Now;
 
@@ -106,7 +111,7 @@ namespace PcShop.Areas.Users.Data
                 Address = dto.Address,
                 ShippingAddress = dto.ShippingAddress,
                 BirthDay = dto.BirthDay,
-
+                
                 ProfileCompleted = true, // 本地註冊通常是一次填完，所以設為 true
                 CreateTime = DateTime.Now,
                 Status = 1,
@@ -130,7 +135,11 @@ namespace PcShop.Areas.Users.Data
                 var user = await _data.GetUserById(oauth.UserId.Value);
                 if (user == null)
                     throw new Exception("OAuth 綁定異常");
-
+                if (user.IsMailVerified != 1)
+                {
+                    user.IsMailVerified = 1;
+                    user.IsMailVerifiedTime = DateTime.Now;
+                }
                 oauth.LastLoginAt = DateTime.Now;
                 await _oauthData.SaveAsync();
 
@@ -149,8 +158,6 @@ namespace PcShop.Areas.Users.Data
                     ProfileCompleted = false,
                     ImageUrl = "/images/no-image.png",
                     CreateTime = DateTime.Now,
-                    IsMailVerified = 1,
-                    IsMailVerifiedTime = DateTime.Now,
                     Status = 1
                 };
 
