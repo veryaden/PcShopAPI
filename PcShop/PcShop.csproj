@@ -1,30 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-    <PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
-    <PackageReference Include="MailKit" Version="4.14.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.11" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.11" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+        <PackageReference Include="MailKit" Version="4.14.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
+	</ItemGroup>
 
+	<!-- 核心 Web API / MVC 支援 -->
   <ItemGroup>
-    <Folder Include="Areas\Users\Models\" />
-    <Folder Include="Areas\Users\Views\" />
-    <Folder Include="wwwroot\uploads\ads\" />
-  </ItemGroup>
+	  <FrameworkReference Include="Microsoft.AspNetCore.App" />
+	  <Folder Include="Areas\Users\Models\" />
+      <Folder Include="Areas\Users\Views\" />
+      <Folder Include="wwwroot\uploads\ads\" />
+		<None Include="efpt.config.json.user" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="efpt.config.json.user" />
-  </ItemGroup>
+	
+
+
 
 </Project>
