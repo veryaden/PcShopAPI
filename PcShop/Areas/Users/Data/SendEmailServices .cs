@@ -46,6 +46,10 @@ namespace PcShop.Areas.Users.Data
                 _config["Mail:From"],
                 _config["Mail:AppPassword"]
             );
+            var frontendUrl = _config["FrontendUrl"];
+            if (string.IsNullOrWhiteSpace(frontendUrl))
+                throw new Exception("FrontendUrl 未設定");
+
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }

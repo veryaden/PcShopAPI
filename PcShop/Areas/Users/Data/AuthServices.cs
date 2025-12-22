@@ -111,7 +111,7 @@ namespace PcShop.Areas.Users.Data
                 CreateTime = DateTime.Now,
                 Status = 1,
                 ImageUrl = "/images/no-image.png",
-                Provider = null // 標記為本地帳號
+                Provider = "local" // 標記為本地帳號
             };
 
             await _data.InsertUser(user);
