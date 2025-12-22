@@ -17,6 +17,7 @@
   <ItemGroup>
     <Folder Include="Areas\Users\Models\" />
     <Folder Include="Areas\Users\Views\" />
+    <Folder Include="wwwroot\uploads\ads\" />
   </ItemGroup>
 
   <ItemGroup>

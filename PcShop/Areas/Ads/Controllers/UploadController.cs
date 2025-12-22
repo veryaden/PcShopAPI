@@ -22,6 +22,7 @@ namespace PcShop.Areas.Ads.Controllers
             var folder = Path.Combine(_env.WebRootPath, "uploads", "ads");
             Directory.CreateDirectory(folder);
 
+
             var fullPath = Path.Combine(folder, fileName);
             using var stream = new FileStream(fullPath, FileMode.Create);
             await file.CopyToAsync(stream);
