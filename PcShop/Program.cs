@@ -17,6 +17,8 @@ using PcShop.Areas.Users.Data;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
 using System.Text;
+using PcShop.Areas.Cart.Repositories;
+using PcShop.Areas.Cart.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,6 +89,7 @@ builder.Services.AddScoped<DinoPointCalculator>();
 builder.Services.AddScoped<SnakePointCalculator>();
 // Factory¡]­t³d¡u¿ï½Ö¨Óºâ¡v¡^
 builder.Services.AddScoped<GamePointCalculatorFactory>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 
 

@@ -1,9 +1,11 @@
 ﻿using PcShop.Areas.Cart.Dtos;
+using PcShop.Areas.Cart.Model;
 
 namespace PcShop.Areas.Cart.Repositories
 {
     public interface ICartService
     {
-        CartDto GetCart();
+        List<CartDto> GetCart(int userId);
+        bool UpdateCart(int userId, CartItemModel model);
     }
 }
