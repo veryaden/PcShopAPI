@@ -57,6 +57,8 @@ builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<IOAuthData, OAuthData>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ISendEmailService, SendEmailServices>();
+builder.Services.AddScoped<IMemberCenterData, MeMberCenterData>();
+builder.Services.AddScoped<IMemberCenterService, MemberCenterService>();
 builder.Services.AddAuthorization();
 
 // Add services to the container.

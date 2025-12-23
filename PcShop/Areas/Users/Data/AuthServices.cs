@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Auth;
 using Humanizer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
@@ -220,9 +221,9 @@ namespace PcShop.Areas.Users.Data
             var user = await _data.GetUserByEmail(mail);
 
             // 不暴露帳號是否存在
-            if (user == null)
+            if (user == null || user.Provider != "local")
                 return;
-
+            
             user.ResetPasswordToken = Guid.NewGuid().ToString();
             user.ResetPasswordExpireAt = DateTime.Now.AddHours(1);
 
@@ -245,7 +246,10 @@ namespace PcShop.Areas.Users.Data
 
             if (user == null || user.ResetPasswordExpireAt < DateTime.Now)
                 throw new Exception("驗證碼無效或已過期");
-
+            if (user.Provider != "local")
+            {
+                throw new Exception("此帳號為第三方登入,不支援密碼重設");
+            }
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             user.ResetPasswordToken = null;
             user.ResetPasswordExpireAt = null;
