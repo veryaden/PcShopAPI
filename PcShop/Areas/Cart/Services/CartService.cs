@@ -54,5 +54,34 @@ namespace PcShop.Areas.Cart.Services
 
             return true;
         }
+
+        /// <summary>
+        /// 刪除購物車項目
+        /// </summary>
+        /// <param name="userId">使用者的 ID (來自 Token)</param>
+        /// <param name="itemId">要刪除的商品 ID (對應資料庫的 Skuid)</param>
+        /// <returns>刪除成功回傳 true，失敗回傳 false</returns>
+        public bool DeleteCartItem(int userId, int cartItemId)
+        {
+            // 1. 查詢資料：確保是「該使用者的購物車」且「包含該商品」
+            // 邏輯與你的 UpdateCart 保持一致
+            var query = _context.CartItems
+                .Where(o => o.Cart.UserId == userId && o.CartItemId == cartItemId)
+                .FirstOrDefault();
+
+            // 2. 如果找不到資料 (可能已經被刪除了，或是該使用者根本沒這個商品)
+            if (query == null)
+            {
+                return false;
+            }
+
+            // 3. 告訴 EF Core 標記這個物件為「刪除」狀態
+            _context.CartItems.Remove(query);
+
+            // 4. 存檔 (這時候才會真的對資料庫下 DELETE SQL 指令)
+            _context.SaveChanges();
+
+            return true;
+        }
     }
 }

@@ -7,5 +7,7 @@ namespace PcShop.Areas.Cart.Repositories
     {
         List<CartDto> GetCart(int userId);
         bool UpdateCart(int userId, CartItemModel model);
+
+        bool DeleteCartItem(int userId, int cartItemId);
     }
 }

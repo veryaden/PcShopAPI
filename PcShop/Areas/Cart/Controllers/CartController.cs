@@ -48,5 +48,33 @@ namespace PcShop.Areas.Cart.Controllers
             var cart = _cartService.UpdateCart(userId, model);
             return Ok(cart);
         }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("Delete/{cartItemId}")]
+        //要改
+        public IActionResult DeleteCart(int cartItemId)  
+        {
+            //取得使用者ID
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //如果沒取得到就回傳401 沒權限的意思,來防止轉型錯誤，更加安全
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
+            // 呼叫剛剛寫好的 Service
+            bool isDeleted = _cartService.DeleteCartItem(userId, cartItemId);
+
+            if (isDeleted)
+            {
+                return Ok(new { message = "刪除成功" });
+            }
+            else
+            {
+                // 如果回傳 false，可能是 ID 傳錯了找不到該商品
+                return NotFound("找不到該商品或刪除失敗");
+            }
+        }
     }
 }
+    
