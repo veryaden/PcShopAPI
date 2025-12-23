@@ -59,6 +59,7 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ISendEmailService, SendEmailServices>();
 builder.Services.AddScoped<IMemberCenterData, MeMberCenterData>();
 builder.Services.AddScoped<IMemberCenterService, MemberCenterService>();
+builder.Services.AddScoped<IOrderData, OrderData>();
 builder.Services.AddAuthorization();
 
 // Add services to the container.
@@ -106,7 +107,7 @@ builder.Services.AddScoped<GamePointCalculatorFactory>();
 
 builder.Services.AddScoped<IAdRepository, AdRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
-builder.Services.AddScoped<IAdService, AdService>();
+builder.Services.AddScoped<IAdService, AdService>(); 
 
 
 var app = builder.Build();

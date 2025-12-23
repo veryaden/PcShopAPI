@@ -6,5 +6,7 @@ namespace PcShop.Areas.Users.Interface
     {
         Task<UserProfile?> GetUserAsync(int userId);
         Task<List<Order>> GetLatestOrdersAsync(int userId, int take);
+        Task<UserProfile?> GetUserForUpdateAsync(int userId);
+        Task SaveAsync();
     }
 }

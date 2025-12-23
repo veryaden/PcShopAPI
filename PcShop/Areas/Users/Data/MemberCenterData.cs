@@ -29,6 +29,15 @@ namespace PcShop.Areas.Users.Data
                 .ToListAsync();
         }
 
+        public Task<UserProfile?> GetUserForUpdateAsync(int userId)
+        {
+            return _context.UserProfiles
+                .FirstOrDefaultAsync(u => u.UserId == userId); // 不要 AsNoTracking
+        }
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }
 

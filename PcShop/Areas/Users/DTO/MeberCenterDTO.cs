@@ -11,6 +11,7 @@ public class MemberCenterDTO
     {
         public MemberProfileDto Profile { get; set; } = new();
         public List<MemberLatestOrderDto> LatestOrders { get; set; } = new();
+
     }
 
     public class MemberProfileDto
@@ -27,6 +28,39 @@ public class MemberCenterDTO
         public string StatusText { get; set; } = "";     // 待付款/配送中/已完成
         public string StatusCode { get; set; } = "";     // pending/shipping/completed (給你綁 class)
         public decimal TotalAmount { get; set; }
+    }
+    public class MemberOrderListDto
+    {
+        public string OrderNo { get; set; } = "";
+        public DateTime CreateTime { get; set; }
+        public string StatusText { get; set; } = "";
+        public string StatusCode { get; set; } = "";
+        public decimal TotalAmount { get; set; }
+    }
+    public class MemberProfileEditDto
+    {
+        public string FullName { get; set; } = "";
+        public DateTime BirthDate { get; set; }
+        public string Phone { get; set; } = "";
+    }
+
+    public class MemberAddressEditDto
+    {
+        public string Address { get; set; } = "";       // 帳單地址 or 常用地址
+        public string ShipAddress { get; set; } = "";   // 收件地址
+    }
+
+    public class ChangePasswordDto
+    {
+        public string CurrentPassword { get; set; } = "";
+        public string NewPassword { get; set; } = "";
+    }
+
+    // 給前端判斷第三方能不能改密碼
+    public class AccountSecurityDto
+    {
+        public string Provider { get; set; } = "local"; // local/google/facebook...
+        public bool CanChangePassword => Provider == "local";
     }
 }
 
