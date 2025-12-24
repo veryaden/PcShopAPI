@@ -78,16 +78,16 @@ namespace PcShop.Areas.Cart.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("Coupons/{userId}")]
-        public IActionResult GetCoupons(int userId)
+        [Route("Coupons")]
+        public IActionResult GetCoupons()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdClaim))
             {
-                return Unauthorized();
+                return Unauthorized("無效的使用者身分");
             }
 
-            //int userId = int.Parse(userIdClaim);
+            int userId = int.Parse(userIdClaim);
             var coupons = _cartService.GetCoupons(userId);
             return Ok(coupons);
         }
