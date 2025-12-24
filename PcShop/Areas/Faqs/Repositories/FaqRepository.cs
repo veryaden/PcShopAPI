@@ -34,6 +34,35 @@ namespace PcShop.Areas.Faqs.Repositories
                 .Include(f => f.Faqblocks)
                 .FirstOrDefaultAsync(f => f.Faqid == faqId && f.IsActive);
         }
+
+        public async Task<List<Faqcategory>> GetAllCategoriesAsync()
+        {
+            return await _context.Faqcategories
+                .OrderBy(c => c.SortOrder)
+                .ToListAsync();
+        }
+
+        public async Task AddCategoryAsync(Faqcategory category)
+        {
+            await _context.Faqcategories.AddAsync(category);
+        }
+
+        public async Task<Faq?> GetByIdAsync(long faqId)
+        {
+            return await _context.Faqs
+                .Include(f => f.Faqblocks)
+                .FirstOrDefaultAsync(f => f.Faqid == faqId);
+        }
+
+        public async Task AddAsync(Faq faq)
+        {
+            await _context.Faqs.AddAsync(faq);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 
 }
