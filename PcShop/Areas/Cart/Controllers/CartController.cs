@@ -78,8 +78,8 @@ namespace PcShop.Areas.Cart.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("Coupons")]
-        public IActionResult GetCoupons()
+        [Route("Coupons/{userId}")]
+        public IActionResult GetCoupons(int userId)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdClaim))
@@ -87,7 +87,7 @@ namespace PcShop.Areas.Cart.Controllers
                 return Unauthorized();
             }
 
-            int userId = int.Parse(userIdClaim);
+            //int userId = int.Parse(userIdClaim);
             var coupons = _cartService.GetCoupons(userId);
             return Ok(coupons);
         }
