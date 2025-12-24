@@ -29,5 +29,27 @@ namespace PcShop.Areas.Ads.Controllers
 
             return Ok(new { mediaUrl = $"/uploads/ads/{fileName}" });
         }
+        [HttpPost("faq-image")]
+        public async Task<IActionResult> UploadFaqImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file");
+
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var allow = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            if (!allow.Contains(ext))
+                return BadRequest("Invalid file type");
+
+            var fileName = $"{Guid.NewGuid()}{ext}";
+
+            var folder = Path.Combine(_env.WebRootPath, "uploads", "faqs");
+            Directory.CreateDirectory(folder);
+
+            var fullPath = Path.Combine(folder, fileName);
+            using var stream = new FileStream(fullPath, FileMode.Create);
+            await file.CopyToAsync(stream);
+
+            return Ok(new { imageUrl = $"/uploads/faqs/{fileName}" });
+        }
     }
 }
