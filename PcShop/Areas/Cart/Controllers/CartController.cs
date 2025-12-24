@@ -75,6 +75,38 @@ namespace PcShop.Areas.Cart.Controllers
                 return NotFound("找不到該商品或刪除失敗");
             }
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("Coupons")]
+        public IActionResult GetCoupons()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized();
+            }
+
+            int userId = int.Parse(userIdClaim);
+            var coupons = _cartService.GetCoupons(userId);
+            return Ok(coupons);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("ValidateCoupon")]
+        public IActionResult ValidateCoupon([FromBody] int userCouponId)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized();
+            }
+
+            int userId = int.Parse(userIdClaim);
+            var result = _cartService.ValidateCoupon(userId, userCouponId);
+            return Ok(result);
+        }
     }
 }
     

@@ -83,5 +83,103 @@ namespace PcShop.Areas.Cart.Services
 
             return true;
         }
+
+        // 修改這裡：將 List<UserCoupon> 改為 List<UserCouponDto>
+        public List<UserCouponDto> GetCoupons(int userId)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            // coupons 的型別是 List<UserCouponDto>
+            var coupons = _context.UserCoupons
+                .Where(uc => uc.UserId == userId && !uc.IsUsed && uc.Coupon.IsActive && uc.Coupon.ExpirationDate >= today)
+                .Select(uc => new UserCouponDto
+                {
+                    UserCouponId = uc.UserCouponId,
+                    CouponCode = uc.Coupon.CouponCode,
+                    Name = uc.Coupon.CouponCode, // Using CouponCode as Name for now
+                    DiscountType = uc.Coupon.DiscountType,
+                    DiscountValue = uc.Coupon.DiscountValue,
+                    MinOrderAmount = uc.Coupon.MinOrderAmount,
+                    IsActive = uc.Coupon.IsActive
+                })
+                .ToList();
+
+            return coupons;
+        }
+
+        public CouponValidationDto ValidateCoupon(int userId, int userCouponId)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var userCoupon = _context.UserCoupons
+                .Include(uc => uc.Coupon)
+                // 檢查優惠券狀態 (是否領取、是否使用、是否過期)
+                .FirstOrDefault(uc => uc.UserCouponId == userCouponId && uc.UserId == userId);
+
+            if (userCoupon == null)
+            {
+                return new CouponValidationDto { Success = false, Message = "找不到該優惠券" };
+            }
+
+            if (userCoupon.IsUsed)
+            {
+                return new CouponValidationDto { Success = false, Message = "此優惠券已使用過" };
+            }
+
+            if (!userCoupon.Coupon.IsActive || userCoupon.Coupon.ExpirationDate < today)
+            {
+                return new CouponValidationDto { Success = false, Message = "此優惠券已過期或失效" };
+            }
+
+            // 計算購物車總金額 (假設購物車內所有項目都要計算)
+            var cartItems = _context.Carts
+                .Where(c => c.UserId == userId)
+                .SelectMany(c => c.CartItems)
+                .Select(ci => new
+                {
+                    Price = ci.Sku.Product.BasePrice + ci.Sku.PriceAdjustment,
+                    ci.Quantity
+                })
+                .ToList();
+
+            decimal cartTotal = cartItems.Sum(ci => ci.Price * ci.Quantity);
+
+            // 檢查優惠券狀態 (是否領取、是否使用、是否過期) (MinOrderAmount)
+            if (cartTotal < userCoupon.Coupon.MinOrderAmount)
+            {
+                return new CouponValidationDto
+                {
+                    Success = false,
+                    Message = $"未滿最低消費金額 {userCoupon.Coupon.MinOrderAmount:N0} 元",
+                    DiscountAmount = 0,
+                    FinalTotal = cartTotal
+                };
+            }
+
+            // 計算折扣金額
+            decimal discountAmount = 0;
+            if (userCoupon.Coupon.DiscountType.Equals("percentage", StringComparison.OrdinalIgnoreCase))
+            {
+                // DiscountValue 是折抵百分比 (例如 10 代表折 10%，即打 9 折)
+                discountAmount = cartTotal * (userCoupon.Coupon.DiscountValue / 100);
+            }
+            else
+            {
+                // 固定金額折抵 (假設除了 percentage 以外都是固定金額，或可再細分)
+                discountAmount = userCoupon.Coupon.DiscountValue;
+            }
+
+            // 確保折扣不會大於總金額
+            if (discountAmount > cartTotal)
+            {
+                discountAmount = cartTotal;
+            }
+
+            return new CouponValidationDto
+            {
+                Success = true,
+                Message = "優惠券套用成功",
+                DiscountAmount = Math.Round(discountAmount, 0),
+                FinalTotal = Math.Round(cartTotal - discountAmount, 0)
+            };
+        }
     }
 }
