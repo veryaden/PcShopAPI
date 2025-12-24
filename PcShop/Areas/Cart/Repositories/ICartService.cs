@@ -11,6 +11,6 @@ namespace PcShop.Areas.Cart.Repositories
 
         List<UserCouponDto> GetCoupons(int userId);
         CouponValidationDto ValidateCoupon(int userId, int userCouponId);
-
+        UserCouponDto GetCouponsData(string couponsCode);
     }
 }

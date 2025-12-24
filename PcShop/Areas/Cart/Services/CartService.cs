@@ -3,6 +3,7 @@ using PcShop.Areas.Cart.Repositories;
 using PcShop.Models;
 using Microsoft.EntityFrameworkCore;
 using PcShop.Areas.Cart.Model;
+using System.Linq.Dynamic.Core;
 
 namespace PcShop.Areas.Cart.Services
 {
@@ -181,5 +182,24 @@ namespace PcShop.Areas.Cart.Services
                 FinalTotal = Math.Round(cartTotal - discountAmount, 0)
             };
         }
+
+        public UserCouponDto GetCouponsData(string couponsCode)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var query = _context.Coupons.Where(c => c.CouponCode == couponsCode && 
+                    c.IsActive && c.ExpirationDate >= today && c.MaxUses > 0)
+                .Select(c => new UserCouponDto()
+                {                  
+                    CouponCode = c.CouponCode,
+                    Name = c.CouponCode, // Using CouponCode as Name for now
+                    DiscountType = c.DiscountType,
+                    DiscountValue = c.DiscountValue,
+                    MinOrderAmount = c.MinOrderAmount,
+                    IsActive = c.IsActive
+                }).FirstOrDefault();
+
+            return query;
+        }
+
     }
 }

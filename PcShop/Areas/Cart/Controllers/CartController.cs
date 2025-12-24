@@ -107,6 +107,15 @@ namespace PcShop.Areas.Cart.Controllers
             var result = _cartService.ValidateCoupon(userId, userCouponId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("Coupons/{couponsCode}")]
+        public IActionResult GetCoupons(string couponsCode)
+        {
+            var coupons = _cartService.GetCouponsData(couponsCode);
+            return Ok(coupons);
+        }
     }
 }
     
