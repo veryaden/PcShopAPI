@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.Data;
+using PcShop.Areas.Users.DTO;
 using System.Security.Claims;
+using static PcShop.Areas.Users.DTO.EmailDTO;
 using static PcShop.Areas.Users.DTO.MemberCenterDTO;
 
 namespace PcShop.Areas.Users.Controllers
@@ -13,10 +15,12 @@ namespace PcShop.Areas.Users.Controllers
     public class MemberController : ControllerBase
     {
         private readonly IMemberCenterService _service;
+        private readonly IConfiguration _config;
 
-        public MemberController(IMemberCenterService service)
+        public MemberController(IMemberCenterService service, IConfiguration config)
         {
             _service = service;
+            _config = config;
         }
 
         private int GetUserIdOrThrow()
@@ -99,7 +103,12 @@ namespace PcShop.Areas.Users.Controllers
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
         {
             int userId = GetUserIdOrThrow();
-            await _service.ChangePasswordAsync(userId, dto);
+
+            var result = await _service.ChangePasswordAsync(userId, dto);
+
+            if (!result.Success)
+                return StatusCode(result.StatusCode, new { message = result.Message });
+
             return NoContent();
         }
 
@@ -110,6 +119,38 @@ namespace PcShop.Areas.Users.Controllers
             int userId = GetUserIdOrThrow();
             var url = await _service.UploadAvatarAsync(userId, file);
             return Ok(new { imageUrl = url });
+        }
+
+
+        [Authorize]
+        [HttpPost("verify-email/send")]
+        public async Task<IActionResult> SendVerifyEmail([FromBody] SendVerifyEmailDto dto)
+        {
+            int userId = GetUserIdOrThrow();
+            await _service.SendVerifyEmailAsync(userId, dto.FrontendUrl);
+            return NoContent();
+        }
+
+        [HttpGet("verify-email/confirm")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string token)
+        {
+            await _service.ConfirmEmailAsync(token);
+            return Ok(new { message = "Email 驗證成功" });
+        }
+
+        [Authorize]
+        [HttpPut("email")]
+        public async Task<IActionResult> UpdateEmail([FromBody] UpdateEmailDto dto)
+        {
+            int userId = GetUserIdOrThrow();
+
+            var frontendUrl = _config["FrontendUrl"];
+            if (string.IsNullOrWhiteSpace(frontendUrl))
+                throw new Exception("FrontendUrl 未設定");
+
+            await _service.UpdateEmailAsync(userId, dto.NewEmail, frontendUrl);
+
+            return NoContent();
         }
     }
 }

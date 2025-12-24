@@ -22,7 +22,7 @@ namespace PcShop.Areas.Users.Data
         public Task<List<Order>> GetLatestOrdersAsync(int userId, int take)
         {
             return _context.Orders
-                .AsNoTracking()
+                .AsNoTracking() //有asnotracking就是不追蹤 不能拿去做update , 只能當GET用 
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.CreateDate)
                 .Take(take)
@@ -38,6 +38,13 @@ namespace PcShop.Areas.Users.Data
         {
             await _context.SaveChangesAsync();
         }
+
+        public Task<UserProfile?> GetUserByEmailTokenAsync(string token)
+        {
+            return _context.UserProfiles
+                .FirstOrDefaultAsync(u => u.EmailVerifyToken == token);
+        }
+
     }
 }
 

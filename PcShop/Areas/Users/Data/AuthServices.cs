@@ -20,17 +20,19 @@ namespace PcShop.Areas.Users.Data
     public class AuthServices : IAuthServices
     {
         private readonly IConfiguration _config;
+        private readonly ILogger<AuthServices> _logger;
         private readonly IAuthData _data;
         private readonly IJwtService _jwtService;
         private readonly IOAuthData _oauthData;
         private readonly ISendEmailService _email;
-        public AuthServices(IConfiguration config, IAuthData data, IJwtService jwtService, IOAuthData oauthData, ISendEmailService email)
+        public AuthServices(IConfiguration config, IAuthData data, IJwtService jwtService, IOAuthData oauthData, ISendEmailService email, ILogger<AuthServices> logger)
         {
             _config = config;
             _data = data;
             _jwtService = jwtService;
             _oauthData = oauthData;
             _email = email;
+            _logger = logger;
         }
 
         private AuthResponseDTO CreateAuthResponse(UserProfile user, string provider)
@@ -222,13 +224,17 @@ namespace PcShop.Areas.Users.Data
 
             // 不暴露帳號是否存在
             if (user == null || user.Provider != "local")
+            {
+                _logger.LogInformation("ForgotPassword ignored for mail={mail}", mail);
                 return;
-            
+            }
+
             user.ResetPasswordToken = Guid.NewGuid().ToString();
             user.ResetPasswordExpireAt = DateTime.Now.AddHours(1);
 
             await _data.SaveAsync();
-
+            if (string.IsNullOrWhiteSpace(user.Mail))
+                throw new Exception("使用者 Email 為空，無法寄送驗證信");
             var link =
                 $"{_config["FrontendUrl"]}/reset-password?token={user.ResetPasswordToken}";
 

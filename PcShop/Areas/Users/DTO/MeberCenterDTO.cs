@@ -47,7 +47,7 @@ public class MemberCenterDTO
     public class MemberAddressEditDto
     {
         public string Address { get; set; } = "";       // 帳單地址 or 常用地址
-        public string ShipAddress { get; set; } = "";   // 收件地址
+        public string ShippingAddress { get; set; } = "";   // 收件地址
     }
 
     public class ChangePasswordDto
@@ -62,5 +62,7 @@ public class MemberCenterDTO
         public string Provider { get; set; } = "local"; // local/google/facebook...
         public bool CanChangePassword => Provider == "local";
     }
+
+   
 }
 

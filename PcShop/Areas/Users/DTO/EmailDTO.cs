@@ -7,10 +7,16 @@ namespace PcShop.Areas.Users.DTO;
 
 public class EmailDTO
 {
-
     public string Mail { get; set; }
-
-
+    public class SendVerifyEmailDto
+    {
+        public string FrontendUrl { get; set; } = "";
+    }
+    public class UpdateEmailDto
+    {
+        public string NewEmail { get; set; } = "";
+        public string FrontendUrl { get; set; } = "";
+    }
 
 }
 
