@@ -118,7 +118,7 @@ namespace PcShop.Areas.Users.Data
                 ProfileCompleted = true, // 本地註冊通常是一次填完，所以設為 true
                 CreateTime = DateTime.Now,
                 Status = 1,
-                ImageUrl = "/images/no-image.png",
+                ImageUrl = null,
                 Provider = "local" // 標記為本地帳號
             };
 
@@ -159,7 +159,7 @@ namespace PcShop.Areas.Users.Data
                     Mail = email,
                     FullName = name,
                     ProfileCompleted = false,
-                    ImageUrl = "/images/no-image.png",
+                    ImageUrl = null,
                     CreateTime = DateTime.Now,
                     Status = 1
                 };
