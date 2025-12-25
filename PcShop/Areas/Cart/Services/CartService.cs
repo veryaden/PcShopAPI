@@ -182,7 +182,6 @@ namespace PcShop.Areas.Cart.Services
                 FinalTotal = Math.Round(cartTotal - discountAmount, 0)
             };
         }
-
         public UserCouponDto GetCouponsData(string couponsCode)
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
