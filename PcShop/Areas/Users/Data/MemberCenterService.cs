@@ -1,9 +1,11 @@
-﻿using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
 using System.Net.Mail;
 using static PcShop.Areas.Users.Data.StatusCodeService;
+using static PcShop.Areas.Users.DTO.EmailDTO;
 using static PcShop.Areas.Users.DTO.MemberCenterDTO;
 
 
@@ -17,14 +19,16 @@ namespace PcShop.Areas.Users.Data
         private readonly ISendEmailService _email;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
+        private readonly IMemoryCache _cache;
 
-        public MemberCenterService(IMemberCenterData member , IOrderData order , ISendEmailService email, IWebHostEnvironment env , IConfiguration config)
+        public MemberCenterService(IMemberCenterData member , IOrderData order , ISendEmailService email, IWebHostEnvironment env , IConfiguration config , IMemoryCache cache)
         {
             _member = member;
             _order = order;
             _email = email;
             _env = env;
             _config = config;
+            _cache = cache;
         }
         public async Task<MemberOverviewDto> GetOverviewAsync(int userId)
         {
@@ -107,7 +111,10 @@ namespace PcShop.Areas.Users.Data
             {
                 FullName = user.FullName ?? "",
                 BirthDate = user.BirthDay,
-                Phone = user.Phone ?? ""
+                Phone = user.Phone ?? "",
+                Mail = user.Mail,
+                IsMailVerified = user.IsMailVerified,
+                ImageUrl = user.ImageUrl
             };
         }
 
@@ -178,46 +185,55 @@ namespace PcShop.Areas.Users.Data
         public async Task UpdateEmailAsync(int userId, string newEmail, string frontendUrl)
         {
             var user = await _member.GetUserForUpdateAsync(userId)
-                ?? throw new Exception("使用者不存在");
+         ?? throw new Exception("使用者不存在");
+
             if (user.Provider != "local")
                 throw new Exception("第三方登入帳號不可修改 Email");
 
-            if (user.Mail == newEmail)
-                throw new Exception("新信箱不可與原信箱相同");
-
-            // 1️⃣ 更新 Email
-            user.Mail = newEmail;
-
-            // 2️⃣ 強制重置驗證狀態
-            user.IsMailVerified = 0;
-            user.EmailVerifyToken = Guid.NewGuid().ToString("N");
-            user.EmailVerifyExpireAt = DateTime.Now.AddHours(24);
-            user.UpdateTime = DateTime.Now;
-
-            await _member.SaveAsync();
-
-            // 3️⃣ 寄送新驗證信
-            var verifyLink = $"{frontendUrl}?token={user.EmailVerifyToken}";
-
-            var html = $@"
-        <h2>PCShop 信箱驗證</h2>
-        <p>您已修改 Email，請重新完成驗證：</p>
-        <a href='{verifyLink}'
-           style='display:inline-block;padding:12px 20px;
-                  background:#2a7bff;color:#fff;
-                  text-decoration:none;border-radius:6px;'>
-           重新驗證 Email
-        </a>
-        <p>此連結 24 小時內有效</p>";
             if (string.IsNullOrWhiteSpace(newEmail))
                 throw new Exception("新 Email 不可為空");
 
             if (!MailAddress.TryCreate(newEmail, out _))
                 throw new Exception("Email 格式不正確");
 
-            PrepareEmailVerification(user);
-            await _email.SendAsync(newEmail, "PCShop 重新驗證 Email", html);
+            if (user.Mail == newEmail)
+                throw new Exception("新信箱不可與原信箱相同");
+
+            // ⭐ 產生驗證 token
+            var token = Guid.NewGuid().ToString("N");
+
+            // ⭐ 存入 MemoryCache（不動 DB）
+            _cache.Set(
+                $"email-change:{token}",
+                new EmailChangeCache
+                {
+                    UserId = userId,
+                    NewEmail = newEmail
+                },
+                TimeSpan.FromHours(24)
+            );
+
+            var verifyLink = $"{frontendUrl}/verify-email?token={token}";
+
+            var html = $@"
+<h2>PCShop 信箱驗證</h2>
+<p>您已修改 Email，請重新完成驗證：</p>
+<a href='{verifyLink}'
+   style='display:inline-block;padding:12px 20px;
+          background:#2a7bff;color:#fff;
+          text-decoration:none;border-radius:6px;'>
+   重新驗證 Email
+</a>
+<p>此連結 24 小時內有效</p>";
+
+            await _email.SendAsync(
+                newEmail,
+                "PCShop 重新驗證 Email",
+                html
+            );
         }
+
+     
 
 
         // ✅ 上傳頭像：存到 wwwroot/uploads/avatars
@@ -285,7 +301,7 @@ namespace PcShop.Areas.Users.Data
 
             await _member.SaveAsync();
 
-            var verifyLink = $"{frontendUrl}?token={user.EmailVerifyToken}";
+            var verifyLink = $"{frontendUrl}/verify-email/?token={user.EmailVerifyToken}";
 
             var html = $@"
         <h2>PCShop 信箱驗證</h2>
@@ -308,18 +324,22 @@ namespace PcShop.Areas.Users.Data
 
         public async Task ConfirmEmailAsync(string token)
         {
-            var user = await _member.GetUserByEmailTokenAsync(token)
-                ?? throw new Exception("驗證連結無效");
+            if (!_cache.TryGetValue(
+        $"email-change:{token}",
+        out EmailChangeCache? data))
+            {
+                throw new Exception("驗證連結無效或已過期");
+            }
 
-            if (user.EmailVerifyExpireAt < DateTime.Now)
-                throw new Exception("驗證連結已過期");
+            var user = await _member.GetUserForUpdateAsync(data.UserId)
+                ?? throw new Exception("使用者不存在");
 
+            user.Mail = data.NewEmail;
             user.IsMailVerified = 1;
-            user.EmailVerifyToken = null;
-            user.EmailVerifyExpireAt = null;
             user.UpdateTime = DateTime.Now;
 
             await _member.SaveAsync();
+            _cache.Remove($"email-change:{token}");
         }
         private void PrepareEmailVerification(UserProfile user)
         {

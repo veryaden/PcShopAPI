@@ -60,6 +60,7 @@ builder.Services.AddScoped<ISendEmailService, SendEmailServices>();
 builder.Services.AddScoped<IMemberCenterData, MeMberCenterData>();
 builder.Services.AddScoped<IMemberCenterService, MemberCenterService>();
 builder.Services.AddScoped<IOrderData, OrderData>();
+builder.Services.AddMemoryCache();
 builder.Services.AddAuthorization();
 
 // Add services to the container.
@@ -107,15 +108,18 @@ builder.Services.AddScoped<GamePointCalculatorFactory>();
 
 builder.Services.AddScoped<IAdRepository, AdRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
-builder.Services.AddScoped<IAdService, AdService>(); 
+builder.Services.AddScoped<IAdService, AdService>();
 
-
+//builder.Services.AddEndpointsApiExplorer();
+//builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    //app.UseSwagger();
+    //app.UseSwaggerUI(); // 這行才是開啟 UI 介面
 }
 
 app.UseHttpsRedirection();

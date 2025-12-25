@@ -130,7 +130,7 @@ namespace PcShop.Areas.Users.Controllers
             await _service.SendVerifyEmailAsync(userId, dto.FrontendUrl);
             return NoContent();
         }
-
+        [AllowAnonymous]
         [HttpGet("verify-email/confirm")]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string token)
         {
@@ -152,5 +152,8 @@ namespace PcShop.Areas.Users.Controllers
 
             return NoContent();
         }
+
+      
+
     }
 }

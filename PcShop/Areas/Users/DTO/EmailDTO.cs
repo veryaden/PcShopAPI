@@ -18,5 +18,11 @@ public class EmailDTO
         public string FrontendUrl { get; set; } = "";
     }
 
+    public class EmailChangeCache //存一個Cache搭配UpdateEmail用
+    {
+        public int UserId { get; set; }
+        public string NewEmail { get; set; } = null!;
+    }
+
 }
 

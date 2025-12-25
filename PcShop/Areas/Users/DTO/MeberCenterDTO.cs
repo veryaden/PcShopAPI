@@ -42,6 +42,10 @@ public class MemberCenterDTO
         public string FullName { get; set; } = "";
         public DateTime BirthDate { get; set; }
         public string Phone { get; set; } = "";
+        public string Mail { get; set; }
+        public int IsMailVerified { get; set; }
+
+        public string ImageUrl { get; set; }
     }
 
     public class MemberAddressEditDto
