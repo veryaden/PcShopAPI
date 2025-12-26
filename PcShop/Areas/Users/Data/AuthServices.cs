@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Auth;
 using Humanizer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
@@ -19,17 +20,19 @@ namespace PcShop.Areas.Users.Data
     public class AuthServices : IAuthServices
     {
         private readonly IConfiguration _config;
+        private readonly ILogger<AuthServices> _logger;
         private readonly IAuthData _data;
         private readonly IJwtService _jwtService;
         private readonly IOAuthData _oauthData;
         private readonly ISendEmailService _email;
-        public AuthServices(IConfiguration config, IAuthData data, IJwtService jwtService, IOAuthData oauthData, ISendEmailService email)
+        public AuthServices(IConfiguration config, IAuthData data, IJwtService jwtService, IOAuthData oauthData, ISendEmailService email, ILogger<AuthServices> logger)
         {
             _config = config;
             _data = data;
             _jwtService = jwtService;
             _oauthData = oauthData;
             _email = email;
+            _logger = logger;
         }
 
         private AuthResponseDTO CreateAuthResponse(UserProfile user, string provider)
@@ -115,7 +118,7 @@ namespace PcShop.Areas.Users.Data
                 ProfileCompleted = true, // 本地註冊通常是一次填完，所以設為 true
                 CreateTime = DateTime.Now,
                 Status = 1,
-                ImageUrl = "/images/no-image.png",
+                ImageUrl = null,
                 Provider = "local" // 標記為本地帳號
             };
 
@@ -156,7 +159,7 @@ namespace PcShop.Areas.Users.Data
                     Mail = email,
                     FullName = name,
                     ProfileCompleted = false,
-                    ImageUrl = "/images/no-image.png",
+                    ImageUrl = null,
                     CreateTime = DateTime.Now,
                     Status = 1
                 };
@@ -220,14 +223,18 @@ namespace PcShop.Areas.Users.Data
             var user = await _data.GetUserByEmail(mail);
 
             // 不暴露帳號是否存在
-            if (user == null)
+            if (user == null || user.Provider != "local")
+            {
+                _logger.LogInformation("ForgotPassword ignored for mail={mail}", mail);
                 return;
+            }
 
             user.ResetPasswordToken = Guid.NewGuid().ToString();
             user.ResetPasswordExpireAt = DateTime.Now.AddHours(1);
 
             await _data.SaveAsync();
-
+            if (string.IsNullOrWhiteSpace(user.Mail))
+                throw new Exception("使用者 Email 為空，無法寄送驗證信");
             var link =
                 $"{_config["FrontendUrl"]}/reset-password?token={user.ResetPasswordToken}";
 
@@ -245,7 +252,10 @@ namespace PcShop.Areas.Users.Data
 
             if (user == null || user.ResetPasswordExpireAt < DateTime.Now)
                 throw new Exception("驗證碼無效或已過期");
-
+            if (user.Provider != "local")
+            {
+                throw new Exception("此帳號為第三方登入,不支援密碼重設");
+            }
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             user.ResetPasswordToken = null;
             user.ResetPasswordExpireAt = null;

@@ -23,6 +23,7 @@ namespace PcShop.Areas.Users.Data
     public class SendEmailServices : ISendEmailService
     {
         private readonly IConfiguration _config;
+        private readonly IMemberCenterData _member; 
 
         public SendEmailServices(IConfiguration config)
         {
@@ -30,14 +31,16 @@ namespace PcShop.Areas.Users.Data
         }
         public async Task SendAsync(string to, string subject, string html)
         {
+            if (string.IsNullOrWhiteSpace(to))
+                throw new Exception("SendAsync: 收到的 to 為空");
+
+            if (string.IsNullOrWhiteSpace(html))
+                throw new Exception("SendAsync: 收到的 html 為空");
+
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(
-                "PCShop",
-                _config["Mail:From"]
-            ));
+            message.From.Add(new MailboxAddress("PCShop", _config["Mail:From"]));
             message.To.Add(MailboxAddress.Parse(to));
             message.Subject = subject;
-
             message.Body = new TextPart("html") { Text = html };
 
             using var client = new MailKit.Net.Smtp.SmtpClient();
@@ -46,15 +49,10 @@ namespace PcShop.Areas.Users.Data
                 _config["Mail:From"],
                 _config["Mail:AppPassword"]
             );
-            var frontendUrl = _config["FrontendUrl"];
-            if (string.IsNullOrWhiteSpace(frontendUrl))
-                throw new Exception("FrontendUrl 未設定");
 
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }
-
-
-
+        
     }
 }
