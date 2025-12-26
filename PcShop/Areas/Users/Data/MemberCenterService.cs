@@ -198,6 +198,10 @@ namespace PcShop.Areas.Users.Data
 
             if (user.Mail == newEmail)
                 throw new Exception("新信箱不可與原信箱相同");
+            if(await _member.IsMailUsed(userId , newEmail))
+            {
+                throw new Exception("已有此信箱,請更換");
+            }
 
             // ⭐ 產生驗證 token
             var token = Guid.NewGuid().ToString("N");

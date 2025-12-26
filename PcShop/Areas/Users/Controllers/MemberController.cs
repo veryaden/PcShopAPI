@@ -147,13 +147,15 @@ namespace PcShop.Areas.Users.Controllers
             var frontendUrl = _config["FrontendUrl"];
             if (string.IsNullOrWhiteSpace(frontendUrl))
                 throw new Exception("FrontendUrl 未設定");
-
-            await _service.UpdateEmailAsync(userId, dto.NewEmail, frontendUrl);
-
-            return NoContent();
+            try
+            {
+                await _service.UpdateEmailAsync(userId, dto.NewEmail, frontendUrl);
+                return NoContent();
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
-
-      
-
     }
 }
