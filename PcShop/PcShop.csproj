@@ -25,6 +25,7 @@
       <Folder Include="wwwroot\uploads\ads\" />
 		<None Include="efpt.config.json.user" />
 	</ItemGroup>
+	
 
 	
 

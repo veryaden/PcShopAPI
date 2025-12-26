@@ -26,7 +26,10 @@ using System.Text;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    WebRootPath = "wwwroot"
+});
 
 
 builder.Services.AddAuthorization();
