@@ -226,7 +226,6 @@ public partial class ExamContext : DbContext
 
             entity.Property(e => e.Faqid).HasColumnName("FAQid");
             entity.Property(e => e.Answer)
-                .IsRequired()
                 .HasColumnType("text")
                 .HasColumnName("answer");
             entity.Property(e => e.CreatedAt)
