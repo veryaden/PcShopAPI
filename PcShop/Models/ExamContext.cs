@@ -153,11 +153,17 @@ public partial class ExamContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasComment("建立時間")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__Carts__CreatedAt__697C9932")
                 .HasColumnType("datetime");
             entity.Property(e => e.LastModifiedAt)
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasComment("最後修改時間")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__Carts__LastModif__6A70BD6B")
                 .HasColumnType("datetime");
+            entity.Property(e => e.SessionKey)
+                .HasDefaultValueSql("(newid())")
+                .HasComment("GUID-用來辨識未登入者")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF_Carts_SessionKey");
             entity.Property(e => e.UserId)
                 .HasComment("所屬用戶ID (未登入訪客為 NULL)")
                 .HasColumnName("UserID");

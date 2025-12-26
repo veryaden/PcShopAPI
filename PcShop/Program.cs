@@ -23,6 +23,10 @@ using PcShop.Areas.Users.Interface;
 using PcShop.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using PcShop.Areas.Cart.Repositories;
+using PcShop.Areas.Cart.Services;
+using PcShop.Areas.Checkout.Repositories;
+using PcShop.Areas.Checkout.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
 
@@ -108,6 +112,8 @@ builder.Services.AddScoped<DinoPointCalculator>();
 builder.Services.AddScoped<SnakePointCalculator>();
 // Factory¡]­t³d¡u¿ï½Ö¨Óºâ¡v¡^
 builder.Services.AddScoped<GamePointCalculatorFactory>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICheckoutService, CheckoutService>();
 
 builder.Services.AddScoped<IAdRepository, AdRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();

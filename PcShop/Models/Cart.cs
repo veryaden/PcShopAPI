@@ -27,6 +27,11 @@ public partial class Cart
     /// </summary>
     public DateTime LastModifiedAt { get; set; }
 
+    /// <summary>
+    /// GUID-用來辨識未登入者
+    /// </summary>
+    public Guid SessionKey { get; set; }
+
     public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 
     public virtual UserProfile User { get; set; }
