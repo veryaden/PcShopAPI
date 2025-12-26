@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\OrderItems\Dtos\" />
     <Folder Include="Areas\Users\Models\" />
     <Folder Include="Areas\Users\Views\" />
   </ItemGroup>
