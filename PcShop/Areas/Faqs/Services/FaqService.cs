@@ -71,8 +71,7 @@ namespace PcShop.Areas.Faqs.Services
                 SortOrder = c.SortOrder
             }).ToList();
         }
-
-        public async Task CreateCategoryAsync(FaqCategoryCreateDto dto)
+        public async Task<Faqcategory> CreateCategoryAsync(FaqCategoryCreateDto dto)
         {
             var entity = new Faqcategory
             {
@@ -85,8 +84,10 @@ namespace PcShop.Areas.Faqs.Services
 
             await _repo.AddCategoryAsync(entity);
             await _repo.SaveChangesAsync();
-        }
 
+            return entity;
+        }
+        
         public async Task<List<FaqListDto>> GetFaqsByCategoryForAdminAsync(int categoryId)
         {
             var faqs = await _repo.GetFaqsByCategoryAsync(categoryId);
@@ -119,14 +120,12 @@ namespace PcShop.Areas.Faqs.Services
                     }).ToList()
             };
         }
-
-
-
         public async Task UpsertAsync(FaqUpsertDto dto)
         {
             Faq faq;
             var now = DateTime.Now;
-
+            if (dto.CategoryId <= 0)
+                throw new Exception("Category is required");
             // 1️⃣ 新增 or 編輯 FAQ 主檔
             if (dto.FaqId.HasValue)
             {
@@ -174,6 +173,36 @@ namespace PcShop.Areas.Faqs.Services
             await _repo.SaveChangesAsync();
         }
 
+        public async Task DeleteAsync(long faqId)
+        {
+            var faq = await _repo.GetByIdAsync(faqId)
+                ?? throw new Exception("FAQ not found");
+
+            await _repo.RemoveAsync(faq);
+            await _repo.SaveChangesAsync();
+        }
+        public async Task DeleteCategoryAsync(int categoryId)
+        {
+            var category = await _repo.GetCategoryByIdAsync(categoryId);
+
+            if (category == null || !category.IsActive)
+                throw new Exception("Category not found");
+
+            // 1️⃣ 是否有「啟用中的」子分類
+            var hasChildren = await _repo.HasChildCategoriesAsync(categoryId);
+            if (hasChildren)
+                throw new Exception("Category has sub categories");
+
+            // 2️⃣ 是否有「啟用中的」FAQ
+            if (category.Faqs.Any(f => f.IsActive))
+                throw new Exception("Category has FAQs");
+
+            // 3️⃣ 軟刪除
+            category.IsActive = false;
+            category.UpdatedAt = DateTime.Now;
+
+            await _repo.SaveChangesAsync();
+        }
     }
 
 }

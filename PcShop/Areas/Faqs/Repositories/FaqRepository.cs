@@ -38,10 +38,10 @@ namespace PcShop.Areas.Faqs.Repositories
         public async Task<List<Faqcategory>> GetAllCategoriesAsync()
         {
             return await _context.Faqcategories
+                .Where(c => c.IsActive)
                 .OrderBy(c => c.SortOrder)
                 .ToListAsync();
         }
-
         public async Task AddCategoryAsync(Faqcategory category)
         {
             await _context.Faqcategories.AddAsync(category);
@@ -62,6 +62,33 @@ namespace PcShop.Areas.Faqs.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+        public async Task RemoveAsync(Faq faq)
+        {
+            _context.Faqblocks.RemoveRange(faq.Faqblocks);
+            _context.Faqs.Remove(faq);
+        }
+        /// <summary>
+        /// 依分類 ID 取得分類（給後台刪除用）
+        /// </summary>
+        public async Task<Faqcategory?> GetCategoryByIdAsync(int id)
+        {
+            return await _context.Faqcategories
+                .Include(c => c.Faqs) // ⚠️ 判斷能不能刪
+                .FirstOrDefaultAsync(c => c.Faqcategoryid == id);
+        }
+
+        /// <summary>
+        /// 刪除分類（只刪分類本身）
+        /// </summary>
+        public async Task DeleteCategoryAsync(Faqcategory category)
+        {
+            _context.Faqcategories.Remove(category);
+        }
+        public async Task<bool> HasChildCategoriesAsync(int parentCategoryId)
+        {
+            return await _context.Faqcategories
+                .AnyAsync(c => c.ParentCategoryId == parentCategoryId && c.IsActive);
         }
     }
 
