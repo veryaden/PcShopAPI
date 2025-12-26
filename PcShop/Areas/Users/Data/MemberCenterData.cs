@@ -34,6 +34,12 @@ namespace PcShop.Areas.Users.Data
             return _context.UserProfiles
                 .FirstOrDefaultAsync(u => u.UserId == userId); // 不要 AsNoTracking
         }
+        public async Task<bool> IsMailUsed(int userId , string mail)
+        {
+            return await _context.UserProfiles.AnyAsync(u => u.Mail == mail && u.UserId != userId); // 不要 AsNoTracking
+
+        }
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();
