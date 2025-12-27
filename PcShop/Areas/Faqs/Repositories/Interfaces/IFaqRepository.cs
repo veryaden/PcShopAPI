@@ -25,6 +25,7 @@ namespace PcShop.Areas.Faqs.Repositories.Interfaces
         Task<Faqcategory?> GetCategoryByIdAsync(int id);
         Task DeleteCategoryAsync(Faqcategory category);
         Task<bool> HasChildCategoriesAsync(int parentCategoryId);
+         Task RemoveFaqBlocksAsync(IEnumerable<Faqblock> blocks);
     }
 
 }

@@ -46,13 +46,14 @@ public partial class UserProfile
     public string Provider { get; set; }
 
     public bool ProfileCompleted { get; set; }
-    //下面四個都自己偷加的 不是原生SQL
-    public string? ResetPasswordToken { get; set; }
+
+    public string ResetPasswordToken { get; set; }
+
     public DateTime? ResetPasswordExpireAt { get; set; }
 
-    public string? EmailVerifyToken { get; set; }
-    public DateTime? EmailVerifyExpireAt { get; set; }
+    public string EmailVerifyToken { get; set; }
 
+    public DateTime? EmailVerifyExpireAt { get; set; }
 
     public virtual ICollection<BrowsingHistory> BrowsingHistories { get; set; } = new List<BrowsingHistory>();
 

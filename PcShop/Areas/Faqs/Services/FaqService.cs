@@ -1,4 +1,5 @@
-﻿using PcShop.Areas.Faqs.Dtos;
+﻿using Microsoft.EntityFrameworkCore;
+using PcShop.Areas.Faqs.Dtos;
 using PcShop.Areas.Faqs.Repositories.Interfaces;
 using PcShop.Areas.Faqs.Services.Interfaces;
 using PcShop.Models;
@@ -126,7 +127,7 @@ namespace PcShop.Areas.Faqs.Services
             var now = DateTime.Now;
             if (dto.CategoryId <= 0)
                 throw new Exception("Category is required");
-            // 1️⃣ 新增 or 編輯 FAQ 主檔
+            
             if (dto.FaqId.HasValue)
             {
                 faq = await _repo.GetByIdAsync(dto.FaqId.Value)
@@ -135,11 +136,10 @@ namespace PcShop.Areas.Faqs.Services
                 faq.Question = dto.Question;
                 faq.CategoryId = dto.CategoryId;
                 faq.UpdatedAt = now;
-
-                // ⚠️ Answer 不再用，清空或保留都可以（選一）
                 faq.Answer = null;
 
-                // 🔥 關鍵：先刪掉舊的 blocks
+                // ✅ 正確：明確刪除舊 blocks
+                await _repo.RemoveFaqBlocksAsync(faq.Faqblocks);
                 faq.Faqblocks.Clear();
             }
             else

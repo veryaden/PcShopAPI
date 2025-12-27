@@ -90,6 +90,12 @@ namespace PcShop.Areas.Faqs.Repositories
             return await _context.Faqcategories
                 .AnyAsync(c => c.ParentCategoryId == parentCategoryId && c.IsActive);
         }
+
+        public async Task RemoveFaqBlocksAsync(IEnumerable<Faqblock> blocks)
+        {
+            _context.Faqblocks.RemoveRange(blocks);
+            await Task.CompletedTask;
+        }
     }
 
 }
