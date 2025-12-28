@@ -279,8 +279,7 @@ namespace PcShop.Areas.Users.Data
             {
                 Console.Write(err.Message);
             }
-        }
-
+        }    
         public async Task ConfirmEmailAsync(string token)
         {
             if (_cache.TryGetValue(
@@ -315,14 +314,6 @@ namespace PcShop.Areas.Users.Data
 
             // ❌ 都不是
             throw new Exception("驗證連結無效或已過期");
-        }
-
-        private void PrepareEmailVerification(UserProfile user)
-        {
-            user.IsMailVerified = 0;
-            user.EmailVerifyToken = Guid.NewGuid().ToString("N");
-            user.EmailVerifyExpireAt = DateTime.Now.AddHours(24);
-            user.UpdateTime = DateTime.Now;
         }
 
         // ✅ 上傳頭像：存到 wwwroot/uploads/avatars
