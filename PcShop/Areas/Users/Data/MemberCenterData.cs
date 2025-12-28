@@ -12,10 +12,9 @@ namespace PcShop.Areas.Users.Data
         {
             _context = context;
         }
-        public Task<UserProfile?> GetUserAsync(int userId)
+        public Task<UserProfile?> GetUserAsync(int userId) //還沒寫Notracking版Getuserasync
         {
             return _context.UserProfiles
-                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 

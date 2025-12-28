@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Build.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.Interface;
@@ -240,24 +241,25 @@ namespace PcShop.Areas.Users.Data
 
         public async Task SendVerifyEmailAsync(int userId, string frontendUrl)
         {
-
-            var user = await _member.GetUserAsync(userId)
+            try
+            {
+                var user = await _member.GetUserAsync(userId)
                 ?? throw new Exception("使用者不存在");
 
-            if (user.IsMailVerified == 1)
-                throw new Exception("信箱已驗證");
-          
-          
-            user.EmailVerifyToken = Guid.NewGuid().ToString("N");
-            user.EmailVerifyExpireAt = DateTime.Now.AddHours(24);
-            user.UpdateTime = DateTime.Now;
+                if (user.IsMailVerified == 1)
+                    throw new Exception("信箱已驗證");
 
-            await _member.SaveAsync();
-  
 
-            var verifyLink = $"{frontendUrl}/verify-email/?token={user.EmailVerifyToken}";
+                user.EmailVerifyToken = Guid.NewGuid().ToString("N");
+                user.EmailVerifyExpireAt = DateTime.Now.AddHours(24);
+                user.UpdateTime = DateTime.Now;
 
-            var html = $@"
+                await _member.SaveAsync();
+
+
+                var verifyLink = $"{frontendUrl}/verify-email/?token={user.EmailVerifyToken}";
+
+                var html = $@"
         <h2>PCShop 信箱驗證</h2>
         <p>請點擊下方按鈕完成驗證：</p>
         <a href='{verifyLink}'
@@ -267,11 +269,16 @@ namespace PcShop.Areas.Users.Data
            驗證我的 Email
         </a>
         <p>此連結 24 小時內有效</p>";
-            var mailToSend = user.Mail; // 🔒 快照
-            if (string.IsNullOrWhiteSpace(mailToSend))
-                throw new Exception("Email 為空");
+                var mailToSend = user.Mail; // 🔒 快照
+                if (string.IsNullOrWhiteSpace(mailToSend))
+                    throw new Exception("Email 為空");
 
-            await _email.SendAsync(mailToSend, "PCShop 信箱驗證", html);
+                await _email.SendAsync(mailToSend, "PCShop 信箱驗證", html);
+            }
+            catch(Exception err)
+            {
+                Console.Write(err.Message);
+            }
         }
 
         public async Task ConfirmEmailAsync(string token)
