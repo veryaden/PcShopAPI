@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Build.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.Interface;
@@ -237,8 +238,83 @@ namespace PcShop.Areas.Users.Data
             );
         }
 
-     
 
+        public async Task SendVerifyEmailAsync(int userId, string frontendUrl)
+        {
+            try
+            {
+                var user = await _member.GetUserAsync(userId)
+                ?? throw new Exception("使用者不存在");
+
+                if (user.IsMailVerified == 1)
+                    throw new Exception("信箱已驗證");
+
+
+                user.EmailVerifyToken = Guid.NewGuid().ToString("N");
+                user.EmailVerifyExpireAt = DateTime.Now.AddHours(24);
+                user.UpdateTime = DateTime.Now;
+
+                await _member.SaveAsync();
+
+
+                var verifyLink = $"{frontendUrl}/verify-email/?token={user.EmailVerifyToken}";
+
+                var html = $@"
+        <h2>PCShop 信箱驗證</h2>
+        <p>請點擊下方按鈕完成驗證：</p>
+        <a href='{verifyLink}'
+           style='display:inline-block;padding:12px 20px;
+                  background:#2a7bff;color:#fff;
+                  text-decoration:none;border-radius:6px;'>
+           驗證我的 Email
+        </a>
+        <p>此連結 24 小時內有效</p>";
+                var mailToSend = user.Mail; // 🔒 快照
+                if (string.IsNullOrWhiteSpace(mailToSend))
+                    throw new Exception("Email 為空");
+
+                await _email.SendAsync(mailToSend, "PCShop 信箱驗證", html);
+            }
+            catch(Exception err)
+            {
+                Console.Write(err.Message);
+            }
+        }    
+        public async Task ConfirmEmailAsync(string token)
+        {
+            if (_cache.TryGetValue(
+        $"email-change:{token}",
+        out EmailChangeCache? changeData))
+            {
+                var user = await _member.GetUserForUpdateAsync(changeData.UserId)
+                    ?? throw new Exception("使用者不存在");
+
+                user.Mail = changeData.NewEmail;
+                user.IsMailVerified = 1;
+                user.UpdateTime = DateTime.Now;
+
+                await _member.SaveAsync();
+                _cache.Remove($"email-change:{token}");
+                return;
+            }
+            var userByToken = await _member.GetUserByEmailTokenAsync(token);
+            if (userByToken != null)
+            {
+                if (userByToken.EmailVerifyExpireAt < DateTime.Now)
+                    throw new Exception("驗證連結已過期");
+
+                userByToken.IsMailVerified = 1;
+                userByToken.EmailVerifyToken = null;
+                userByToken.EmailVerifyExpireAt = null;
+                userByToken.UpdateTime = DateTime.Now;
+
+                await _member.SaveAsync();
+                return;
+            }
+
+            // ❌ 都不是
+            throw new Exception("驗證連結無效或已過期");
+        }
 
         // ✅ 上傳頭像：存到 wwwroot/uploads/avatars
         public async Task<string> UploadAvatarAsync(int userId, IFormFile file)
@@ -290,70 +366,7 @@ namespace PcShop.Areas.Users.Data
 
             return user.ImageUrl;
         }
-
-
-        public async Task SendVerifyEmailAsync(int userId, string frontendUrl)
-        {
-            var user = await _member.GetUserAsync(userId)
-                ?? throw new Exception("使用者不存在");
-
-            if (user.IsMailVerified == 1)
-                throw new Exception("信箱已驗證");
-
-            user.EmailVerifyToken = Guid.NewGuid().ToString("N");
-            user.EmailVerifyExpireAt = DateTime.Now.AddHours(24);
-
-            await _member.SaveAsync();
-
-            var verifyLink = $"{frontendUrl}/verify-email/?token={user.EmailVerifyToken}";
-
-            var html = $@"
-        <h2>PCShop 信箱驗證</h2>
-        <p>請點擊下方按鈕完成驗證：</p>
-        <a href='{verifyLink}'
-           style='display:inline-block;padding:12px 20px;
-                  background:#2a7bff;color:#fff;
-                  text-decoration:none;border-radius:6px;'>
-           驗證我的 Email
-        </a>
-        <p>此連結 24 小時內有效</p>";
-            var mailToSend = user.Mail; // 🔒 快照
-            if (string.IsNullOrWhiteSpace(mailToSend))
-                throw new Exception("Email 為空");
-
-
-            PrepareEmailVerification(user);
-            await _email.SendAsync(mailToSend, "PCShop 信箱驗證", html);
-        }
-
-        public async Task ConfirmEmailAsync(string token)
-        {
-            if (!_cache.TryGetValue(
-        $"email-change:{token}",
-        out EmailChangeCache? data))
-            {
-                throw new Exception("驗證連結無效或已過期");
-            }
-
-            var user = await _member.GetUserForUpdateAsync(data.UserId)
-                ?? throw new Exception("使用者不存在");
-
-            user.Mail = data.NewEmail;
-            user.IsMailVerified = 1;
-            user.UpdateTime = DateTime.Now;
-
-            await _member.SaveAsync();
-            _cache.Remove($"email-change:{token}");
-        }
-        private void PrepareEmailVerification(UserProfile user)
-        {
-            user.IsMailVerified = 0;
-            user.EmailVerifyToken = Guid.NewGuid().ToString("N");
-            user.EmailVerifyExpireAt = DateTime.Now.AddHours(24);
-            user.UpdateTime = DateTime.Now;
-        }
     }
-
 }
 
 
