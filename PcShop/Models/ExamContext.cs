@@ -153,17 +153,11 @@ public partial class ExamContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasComment("建立時間")
-                .HasAnnotation("Relational:DefaultConstraintName", "DF__Carts__CreatedAt__697C9932")
                 .HasColumnType("datetime");
             entity.Property(e => e.LastModifiedAt)
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasComment("最後修改時間")
-                .HasAnnotation("Relational:DefaultConstraintName", "DF__Carts__LastModif__6A70BD6B")
                 .HasColumnType("datetime");
-            entity.Property(e => e.SessionKey)
-                .HasDefaultValueSql("(newid())")
-                .HasComment("GUID-用來辨識未登入者")
-                .HasAnnotation("Relational:DefaultConstraintName", "DF_Carts_SessionKey");
             entity.Property(e => e.UserId)
                 .HasComment("所屬用戶ID (未登入訪客為 NULL)")
                 .HasColumnName("UserID");
@@ -232,7 +226,6 @@ public partial class ExamContext : DbContext
 
             entity.Property(e => e.Faqid).HasColumnName("FAQid");
             entity.Property(e => e.Answer)
-                .IsRequired()
                 .HasColumnType("text")
                 .HasColumnName("answer");
             entity.Property(e => e.CreatedAt)
@@ -307,13 +300,9 @@ public partial class ExamContext : DbContext
 
             entity.ToTable("Favorite");
 
-            entity.Property(e => e.UserId)
-                .ValueGeneratedOnAdd()
-                .HasColumnName("UserID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
-            entity.Property(e => e.AddDate)
-                .HasDefaultValueSql("(sysdatetime())")
-                .HasAnnotation("Relational:DefaultConstraintName", "DF__Favorite__AddDat__04308F6E");
+            entity.Property(e => e.AddDate).HasDefaultValueSql("(sysdatetime())");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Favorites)
                 .HasForeignKey(d => d.ProductId)
@@ -643,11 +632,11 @@ public partial class ExamContext : DbContext
             entity.ToTable("Position");
 
             entity.Property(e => e.PositionId).HasColumnName("PositionID");
-            entity.Property(e => e.Position1)
+            entity.Property(e => e.Code)
                 .IsRequired()
                 .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("Position");
+                .IsUnicode(false);
+            entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.Size)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -831,6 +820,8 @@ public partial class ExamContext : DbContext
             entity.Property(e => e.CreateTime)
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasAnnotation("Relational:DefaultConstraintName", "DF__UserProfi__Creat__39CD8610");
+            entity.Property(e => e.EmailVerifyExpireAt).HasColumnType("datetime");
+            entity.Property(e => e.EmailVerifyToken).HasMaxLength(100);
             entity.Property(e => e.FullName)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -849,6 +840,8 @@ public partial class ExamContext : DbContext
             entity.Property(e => e.Phone).HasMaxLength(50);
             entity.Property(e => e.ProfileCompleted).HasAnnotation("Relational:DefaultConstraintName", "DF__UserProfi__Profi__544C7222");
             entity.Property(e => e.Provider).HasMaxLength(50);
+            entity.Property(e => e.ResetPasswordExpireAt).HasColumnType("datetime");
+            entity.Property(e => e.ResetPasswordToken).HasMaxLength(100);
             entity.Property(e => e.Salt).HasMaxLength(150);
             entity.Property(e => e.ShippingAddress).HasMaxLength(255);
             entity.Property(e => e.Status)

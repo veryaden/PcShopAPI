@@ -1,6 +1,11 @@
 using Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using PcShop.Areas.Ads.Repositories;
+using PcShop.Areas.Ads.Repositories.Interfaces;
+using PcShop.Areas.Ads.Services;
+using PcShop.Areas.Ads.Services.Interfaces;
 using PcShop.Areas.Faqs.Repositories;
 using PcShop.Areas.Faqs.Repositories.Interfaces;
 using PcShop.Areas.Faqs.Services;
@@ -16,16 +21,22 @@ using PcShop.Areas.Users.Controllers;
 using PcShop.Areas.Users.Data;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using PcShop.Areas.Cart.Repositories;
 using PcShop.Areas.Cart.Services;
 using PcShop.Areas.Checkout.Repositories;
 using PcShop.Areas.Checkout.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    WebRootPath = "wwwroot"
+});
 
-// Add services to the container.
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -42,40 +53,50 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
-        )
-    };
-}); var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 
 builder.Services.AddDbContext<ExamContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Exam")));
 
 builder.Services.AddScoped<IAuthData, AuthData>();
-builder.Services.AddScoped<IAuthBus, AuthBus>();
+builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<IOAuthData, OAuthData>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-
+builder.Services.AddScoped<ISendEmailService, SendEmailServices>();
+builder.Services.AddScoped<IMemberCenterData, MeMberCenterData>();
+builder.Services.AddScoped<IMemberCenterService, MemberCenterService>();
+builder.Services.AddScoped<IOrderData, OrderData>();
+builder.Services.AddMemoryCache();
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers();
+// Add services to the container.
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+            ),
+
+            NameClaimType = JwtRegisteredClaimNames.Sub
+        };
+    });
+
 
 //Faq Services and Repositories
 builder.Services.AddScoped<IFaqRepository, FaqRepository>();
@@ -94,21 +115,28 @@ builder.Services.AddScoped<GamePointCalculatorFactory>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ICheckoutService, CheckoutService>();
 
+builder.Services.AddScoped<IAdRepository, AdRepository>();
+builder.Services.AddScoped<IPositionRepository, PositionRepository>();
+builder.Services.AddScoped<IAdService, AdService>();
 
-
-
+//builder.Services.AddEndpointsApiExplorer();
+//builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    //app.UseSwagger();
+    //app.UseSwaggerUI(); // 這行才是開啟 UI 介面
 }
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 

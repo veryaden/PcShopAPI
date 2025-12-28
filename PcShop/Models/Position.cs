@@ -9,9 +9,13 @@ public partial class Position
 {
     public int PositionId { get; set; }
 
-    public string Position1 { get; set; }
+    public string Code { get; set; }
 
     public string Size { get; set; }
+
+    public string Name { get; set; }
+
+    public bool? IsActive { get; set; }
 
     public virtual ICollection<Ad> Ads { get; set; } = new List<Ad>();
 }

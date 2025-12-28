@@ -47,6 +47,14 @@ public partial class UserProfile
 
     public bool ProfileCompleted { get; set; }
 
+    public string ResetPasswordToken { get; set; }
+
+    public DateTime? ResetPasswordExpireAt { get; set; }
+
+    public string EmailVerifyToken { get; set; }
+
+    public DateTime? EmailVerifyExpireAt { get; set; }
+
     public virtual ICollection<BrowsingHistory> BrowsingHistories { get; set; } = new List<BrowsingHistory>();
 
     public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
