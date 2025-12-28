@@ -22,19 +22,8 @@
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
 	</ItemGroup>
 
-	<!-- 核心 Web API / MVC 支援 -->
+	<!-- �֤� Web API / MVC �䴩 -->
   <ItemGroup>
-	  <FrameworkReference Include="Microsoft.AspNetCore.App" />
-	  <Folder Include="Areas\Users\Models\" />
-      <Folder Include="Areas\Users\Views\" />
-      <Folder Include="wwwroot\uploads\ads\" />
-		<None Include="efpt.config.json.user" />
-	</ItemGroup>
-	
-
-	
-
-
     <Folder Include="Areas\OrderItems\Dtos\" />
     <Folder Include="Areas\Users\Models\" />
     <Folder Include="Areas\Users\Views\" />
