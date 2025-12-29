@@ -99,6 +99,9 @@ public partial class ExamContext : DbContext
                 .IsRequired()
                 .HasMaxLength(100)
                 .IsUnicode(false);
+            entity.Property(e => e.Type)
+                .HasMaxLength(10)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.Position).WithMany(p => p.Ads)
                 .HasForeignKey(d => d.PositionId)
@@ -110,6 +113,8 @@ public partial class ExamContext : DbContext
             entity.HasKey(e => e.StatId).HasName("PK__AdsRepor__3A162D3E178B8316");
 
             entity.ToTable("AdsReport");
+
+            entity.Property(e => e.PositionId).HasColumnName("PositionID");
 
             entity.HasOne(d => d.Ad).WithMany(p => p.AdsReports)
                 .HasForeignKey(d => d.AdId)

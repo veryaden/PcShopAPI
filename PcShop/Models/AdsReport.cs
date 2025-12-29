@@ -15,5 +15,9 @@ public partial class AdsReport
 
     public DateOnly Date { get; set; }
 
+    public int? PositionId { get; set; }
+
+    public DateOnly? CreatedAt { get; set; }
+
     public virtual Ad Ad { get; set; }
 }
