@@ -29,14 +29,6 @@ public class MemberCenterDTO
         public string StatusCode { get; set; } = "";     // pending/shipping/completed (給你綁 class)
         public decimal TotalAmount { get; set; }
     }
-    public class MemberOrderListDto
-    {
-        public string OrderNo { get; set; } = "";
-        public DateTime CreateTime { get; set; }
-        public string StatusText { get; set; } = "";
-        public string StatusCode { get; set; } = "";
-        public decimal TotalAmount { get; set; }
-    }
     public class MemberProfileEditDto
     {
         public string FullName { get; set; } = "";

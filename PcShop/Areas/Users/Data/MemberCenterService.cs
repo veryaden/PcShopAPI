@@ -16,7 +16,6 @@ namespace PcShop.Areas.Users.Data
     public class MemberCenterService : IMemberCenterService
     {
         private readonly IMemberCenterData _member;
-        private readonly IOrderData _order;
         private readonly ISendEmailService _email;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
@@ -25,7 +24,6 @@ namespace PcShop.Areas.Users.Data
         public MemberCenterService(IMemberCenterData member , IOrderData order , ISendEmailService email, IWebHostEnvironment env , IConfiguration config , IMemoryCache cache)
         {
             _member = member;
-            _order = order;
             _email = email;
             _env = env;
             _config = config;
@@ -83,25 +81,6 @@ namespace PcShop.Areas.Users.Data
                 _ => "pending"
             };
         }
-        public async Task<List<MemberOrderListDto>> GetOrdersAsync(int userId,OrderStatus? status)
-        {
-            var orders = await _order.GetOrdersAsync(userId, status);
-
-            return orders.Select(o =>
-            {
-                var s = (OrderStatus)o.OrderStatus;
-
-                return new MemberOrderListDto
-                {
-                    OrderNo = o.OrderNo,
-                    CreateTime = o.CreateDate,
-                    TotalAmount = o.TotalAmount,
-                    StatusText = GetStatusText(s),
-                    StatusCode = GetStatusCode(s)
-                };
-            }).ToList();
-        }
-
 
         public async Task<MemberProfileEditDto> GetProfileAsync(int userId)
         {

@@ -48,12 +48,6 @@ namespace PcShop.Areas.Users.Controllers
             var dto = await _service.GetOverviewAsync(userId);
             return Ok(dto);
         }
-        [HttpGet("orders")]
-        public async Task<IActionResult> Orders([FromQuery] OrderStatus? status)
-        {
-            int userId = GetUserIdOrThrow();
-            return Ok(await _service.GetOrdersAsync(userId, status));
-        }
 
         [Authorize]
         [HttpGet("profile")]

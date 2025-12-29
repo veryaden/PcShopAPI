@@ -26,6 +26,19 @@ namespace PcShop.Areas.Users.Data
                 .OrderByDescending(o => o.CreateDate)
                 .ToListAsync();
         }
+
+        public async Task<Order?> GetOrderDetailAsync(int orderId, int userId)
+        {
+            return await _context.Orders
+        .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Sku)
+                .ThenInclude(s => s.Product)
+                    .ThenInclude(p => p.ProductImages)
+        .FirstOrDefaultAsync(o =>
+            o.OrderId == orderId &&
+            o.UserId == userId);
+        }
+
     }
 }
 

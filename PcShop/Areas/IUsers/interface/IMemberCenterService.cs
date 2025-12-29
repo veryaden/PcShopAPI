@@ -9,7 +9,6 @@ namespace PcShop.Areas.IUsers.Interface
     public interface IMemberCenterService
     {
         Task<MemberOverviewDto> GetOverviewAsync(int userId);
-        Task<List<MemberOrderListDto>> GetOrdersAsync(int userId,OrderStatus? status);
         Task<MemberProfileEditDto> GetProfileAsync(int userId);
         Task UpdateProfileAsync(int userId, MemberProfileEditDto dto);
         Task<MemberAddressEditDto> GetAddressAsync(int userId);
