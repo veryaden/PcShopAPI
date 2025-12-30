@@ -68,6 +68,8 @@ builder.Services.AddScoped<IMemberCenterData, MeMberCenterData>();
 builder.Services.AddScoped<IMemberCenterService, MemberCenterService>();
 builder.Services.AddScoped<IOrderData, OrderData>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IAdminData, AdminData>();
+builder.Services.AddScoped<IAdminServices, AdminServices>();
 builder.Services.AddMemoryCache();
 builder.Services.AddAuthorization();
 
