@@ -26,7 +26,7 @@ namespace PcShop.Areas.Cart.Services
                     id = ci.CartItemId,
                     name = ci.Sku.Product.ProductName,
                     spec = ci.Sku.Skuname,
-                    price = (int)(ci.Sku.Product.BasePrice + ci.Sku.PriceAdjustment),
+                    price = (int)Math.Round(ci.Sku.Product.BasePrice + ci.Sku.PriceAdjustment, MidpointRounding.AwayFromZero),
                     quantity = ci.Quantity,
                     imageUrl = ci.Sku.Product.ProductImages
                         .Where(pi => pi.IsMainOrNot == 1)
@@ -41,8 +41,8 @@ namespace PcShop.Areas.Cart.Services
 
         public bool UpdateCart(int userId, CartItemModel model)
         {
-            var query = _context.CartItems
-                .Where(o => o.Cart.UserId == userId && o.Skuid == model.CartItemId)
+           var query = _context.CartItems
+        .Where(o => o.Cart.UserId == userId && o.CartItemId == model.CartItemId) 
                 .FirstOrDefault();
 
             if (query == null)
@@ -130,18 +130,8 @@ namespace PcShop.Areas.Cart.Services
                 return new CouponValidationDto { Success = false, Message = "此優惠券已過期或失效" };
             }
 
-            // 計算購物車總金額 (假設購物車內所有項目都要計算)
-            var cartItems = _context.Carts
-                .Where(c => c.UserId == userId)
-                .SelectMany(c => c.CartItems)
-                .Select(ci => new
-                {
-                    Price = ci.Sku.Product.BasePrice + ci.Sku.PriceAdjustment,
-                    ci.Quantity
-                })
-                .ToList();
-
-            decimal cartTotal = cartItems.Sum(ci => ci.Price * ci.Quantity);
+            // 計算購物車總金額
+            decimal cartTotal = GetCartTotal(userId);
 
             // 檢查優惠券狀態 (是否領取、是否使用、是否過期) (MinOrderAmount)
             if (cartTotal < userCoupon.Coupon.MinOrderAmount)
@@ -178,8 +168,8 @@ namespace PcShop.Areas.Cart.Services
             {
                 Success = true,
                 Message = "優惠券套用成功",
-                DiscountAmount = Math.Round(discountAmount, 0),
-                FinalTotal = Math.Round(cartTotal - discountAmount, 0)
+                DiscountAmount = Math.Round(discountAmount, 0, MidpointRounding.AwayFromZero),
+                FinalTotal = Math.Round(cartTotal - discountAmount, 0, MidpointRounding.AwayFromZero)
             };
         }
         public UserCouponDto GetCouponsData(string couponsCode)
@@ -198,6 +188,113 @@ namespace PcShop.Areas.Cart.Services
                 }).FirstOrDefault();
 
             return query;
+        }
+
+        public UserPointDto GetUserPoints(int userId)
+        {
+            var now = DateTime.Now;
+            var thirtyDaysFromNow = now.AddDays(30); //30天內即將到期點數
+
+            var query = _context.GamePoints
+                .Where(p => p.UserId == userId 
+                            && p.Status == 1 
+                            && p.UsedAt == null 
+                            && (p.ExpiredAt == null || p.ExpiredAt > now));
+
+            int totalPoints = query.Sum(p => (int?)p.Points) ?? 0;
+
+            int soonExpiring = query
+                .Where(p => p.ExpiredAt != null && p.ExpiredAt <= thirtyDaysFromNow)
+                .Sum(p => (int?)p.Points) ?? 0;
+
+            return new UserPointDto
+            {
+                TotalAvailablePoints = totalPoints,
+                SoonExpiringPoints = soonExpiring
+            };
+        }
+
+        public PointValidationDto ValidatePoints(int userId, int pointsToUse, int? userCouponId = null)
+        {
+            if (pointsToUse < 0)
+            {
+                return new PointValidationDto { Success = false, Message = "點數不能為負數" };
+            }
+
+            // 1. 取得使用者總可用點數
+            var userPoints = GetUserPoints(userId);
+            int availablePoints = userPoints.TotalAvailablePoints;
+
+            if (pointsToUse > availablePoints)
+            {
+                return new PointValidationDto 
+                { 
+                    Success = false, 
+                    Message = $"點數不足，目前可用點數為 {availablePoints} 點",
+                    PointDiscount = 0
+                };
+            }
+
+            // 2. 計算基礎總金額
+            decimal cartTotal = GetCartTotal(userId);
+            decimal discountedTotal = cartTotal;
+            decimal couponDiscount = 0;
+
+            // 3. 如果有套用優惠券，先扣除優惠券金額
+            if (userCouponId.HasValue)
+            {
+                var couponResult = ValidateCoupon(userId, userCouponId.Value);
+                if (couponResult.Success)
+                {
+                    couponDiscount = couponResult.DiscountAmount;
+                    discountedTotal = cartTotal - couponDiscount;
+                }
+                else
+                {
+                    return new PointValidationDto
+                    {
+                        Success = false,
+                        Message = "優惠券無效: " + couponResult.Message,
+                        OriginalTotal = cartTotal,
+                        CouponDiscount = 0,
+                        PointDiscount = 0,
+                        FinalTotal = cartTotal
+                    };
+                }
+            }
+
+            // 4. 計算點數折抵金額 (1點 = 1元)，上限為折扣後的剩餘總額
+            int pointDiscount = pointsToUse;
+
+            if (pointDiscount > discountedTotal)
+            {
+                pointDiscount = (int)Math.Floor(discountedTotal);
+            }
+
+            return new PointValidationDto
+            {
+                Success = true,
+                Message = userCouponId.HasValue ? "已扣除優惠券，點數計算成功" : "點數計算成功",
+                OriginalTotal = cartTotal,
+                CouponDiscount = couponDiscount,
+                PointDiscount = pointDiscount,
+                FinalTotal = cartTotal - couponDiscount - pointDiscount
+            };
+        }
+
+        private decimal GetCartTotal(int userId)
+        {
+            var cartItems = _context.Carts
+                .Where(c => c.UserId == userId)
+                .SelectMany(c => c.CartItems)
+                .Select(ci => new
+                {
+                    Price = ci.Sku.Product.BasePrice + ci.Sku.PriceAdjustment,
+                    ci.Quantity
+                })
+                .ToList();
+
+            return cartItems.Sum(ci => Math.Round(ci.Price, 0, MidpointRounding.AwayFromZero) * ci.Quantity);
         }
 
     }

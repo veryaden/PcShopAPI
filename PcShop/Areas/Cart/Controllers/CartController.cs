@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PcShop.Areas.Cart.Dtos;
 using PcShop.Areas.Cart.Model;
 using PcShop.Areas.Cart.Repositories;
 using System.Security.Claims;
@@ -94,7 +95,7 @@ namespace PcShop.Areas.Cart.Controllers
 
         [HttpPost]
         [Authorize]
-        [Route("ValidateCoupon")]
+        [Route("ValidateCoupon")] //取得該會員所有的優惠券
         public IActionResult ValidateCoupon([FromBody] int userCouponId)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -115,6 +116,36 @@ namespace PcShop.Areas.Cart.Controllers
         {
             var coupons = _cartService.GetCouponsData(couponsCode);
             return Ok(coupons);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("Points")] //取得該會員的點數
+        public IActionResult GetPoints()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
+
+            var points = _cartService.GetUserPoints(userId);
+            return Ok(points);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("ValidatePoints")] //預覽點數折抵後的金額
+        public IActionResult ValidatePoints([FromBody] PointValidationRequest request)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
+
+            var result = _cartService.ValidatePoints(userId, request.PointsToUse, request.UserCouponId);
+            return Ok(result);
         }
     }
 }
