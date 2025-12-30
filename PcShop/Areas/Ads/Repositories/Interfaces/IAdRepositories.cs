@@ -1,12 +1,17 @@
-﻿using PcShop.Models;
+﻿using PcShop.Ads.Dtos;
 
-namespace PcShop.Areas.Ads.Repositories.Interfaces
+namespace PcShop.Ads.Repositories.Interfaces;
+
+public interface IAdRepository
 {
-    public interface IAdRepository
-    {
-        Task<List<Ad>> GetAdsByPositionCodeAsync(string code);
-        Task<Ad?> GetAdAsync(int adId);
-        Task AddAsync(Ad ad);
-        Task SaveAsync();
-    }
+    // Public
+    Task<List<AdDto>> GetActiveAdsByPositionCodeAsync(string positionCode);
+    Task TrackClickAsync(int adId, string positionCode);
+
+    // Admin
+    Task<List<AdDto>> AdminListAdsAsync();
+    Task<int> AdminCreateAdAsync(AdUpsertDto dto);
+    Task AdminUpdateAdAsync(int adId, AdUpsertDto dto);
+    Task AdminDeleteAdAsync(int adId);
+    Task<List<ReportRowDto>> AdminReportAsync(DateTime from, DateTime to);
 }

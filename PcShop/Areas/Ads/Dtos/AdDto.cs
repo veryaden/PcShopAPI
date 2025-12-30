@@ -1,15 +1,18 @@
-﻿namespace PcShop.Areas.Ads.Dtos
-{
-    public class AdDto
-    {
-        public int AdId { get; set; }
-        public string Title { get; set; } = null!;
-        public string MediaUrl { get; set; } = null!;
-        public string? LinkUrl { get; set; }
+﻿namespace PcShop.Ads.Dtos;
 
-        // 位置資訊（方便前端/debug）
-        public string PositionCode { get; set; } = null!;
-        public string? PositionName { get; set; }
-        public string? Size { get; set; }
-    }
+public class AdDto
+{
+    public int AdId { get; set; }
+    public string Title { get; set; } = "";
+    public string MediaUrl { get; set; } = "";
+    public string? LinkUrl { get; set; }
+
+    public int PositionId { get; set; }
+    public string PositionCode { get; set; } = "";  // 方便前端判斷/顯示
+
+    public string Type { get; set; } = "image";     // image | video (varchar(10))
+    public bool Status { get; set; }                // bit
+
+    public DateTime? StartTime { get; set; }        // datetime nullable
+    public DateTime? EndTime { get; set; }          // datetime nullable
 }
