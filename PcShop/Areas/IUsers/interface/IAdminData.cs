@@ -6,8 +6,8 @@ namespace PcShop.Areas.IUsers.Interface
 {
     public interface IAdminData
     {
-        Task<List<Order>> GetOrdersAsync(OrderStatus? status , string? orderno);
+        Task<OrderPagedResult<Order>> GetOrdersAsync(OrderStatus? status, string? orderno, int page, int pageSize);
 
-        Task<Order?> GetOrderDetailAsync(int orderId, int userId);
+        Task<Order?> GetOrderDetailAsync(int orderId);
     }
 }

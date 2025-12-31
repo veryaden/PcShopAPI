@@ -35,9 +35,9 @@ namespace PcShop.Areas.Users.Controllers
         }
         [Authorize]
         [HttpGet("orders")]
-        public async Task<IActionResult> GetMyOrders([FromQuery] OrderStatus? status, string? orderno)
+        public async Task<IActionResult> GetMyOrders([FromQuery] OrderStatus? status, string? orderno , [FromQuery] int page = 1,[FromQuery] int pageSize = 10)
         {
-            var result = await _admin.GetOrderListAsync(status , orderno);
+            var result = await _admin.GetOrderListAsync(status , orderno , page ,pageSize);
             return Ok(result);
         }
 
@@ -45,8 +45,8 @@ namespace PcShop.Areas.Users.Controllers
         [HttpGet("orders/{orderId}")]
         public async Task<IActionResult> GetOrderDetail(int orderId)
         {
-            int userId = GetUserIdOrThrow();
-            var result = await _admin.GetOrderDetailAsync(orderId, userId);
+            //int userId = GetUserIdOrThrow();
+            var result = await _admin.GetOrderDetailAsync(orderId);
             return Ok(result);
         }
 

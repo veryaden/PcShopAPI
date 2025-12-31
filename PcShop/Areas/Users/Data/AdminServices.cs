@@ -30,24 +30,30 @@ namespace PcShop.Areas.Users.Data
             _admin = admin;
         }
 
-        public async Task<List<OrderListDTO>> GetOrderListAsync(OrderStatus? status , string? orderno)
+        public async Task<OrderPagedResult<OrderListDTO>> GetOrderListAsync(OrderStatus? status , string? orderno, int page,int pageSize)
         {
-            var orders = await _admin.GetOrdersAsync(status ,orderno);
+            var pagedOrders = await _admin.GetOrdersAsync(status, orderno, page, pageSize);
 
-            return orders.Select(o => new OrderListDTO
+            return new OrderPagedResult<OrderListDTO>
             {
-                OrderId = o.OrderId,
-                OrderNo = o.OrderNo,
-                CreateDate = o.CreateDate,
-                TotalAmount = o.TotalAmount,
-                Status = (OrderStatus)o.OrderStatus
-            }).ToList();
+                Page = pagedOrders.Page,
+                PageSize = pagedOrders.PageSize,
+                Total = pagedOrders.Total,
+                Items = pagedOrders.Items.Select(o => new OrderListDTO
+                {
+                    OrderId = o.OrderId,
+                    OrderNo = o.OrderNo,
+                    CreateDate = o.CreateDate,
+                    TotalAmount = o.TotalAmount,
+                    Status = (OrderStatus)o.OrderStatus
+                }).ToList()
+            };
         }
 
 
-        public async Task<OrderDetailsDTO> GetOrderDetailAsync(int orderId, int userId)
+        public async Task<OrderDetailsDTO> GetOrderDetailAsync(int orderId)
         {
-            var order = await _admin.GetOrderDetailAsync(orderId, userId)
+            var order = await _admin.GetOrderDetailAsync(orderId)
                 ?? throw new Exception("訂單不存在");
 
             return new OrderDetailsDTO
