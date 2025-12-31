@@ -1,8 +1,8 @@
-﻿using PcShop.Ads.Dtos;
-using PcShop.Ads.Repositories.Interfaces;
-using PcShop.Ads.Services.Interfaces;
+﻿using PcShop.Areas.Ads.Dtos;
+using PcShop.Areas.Ads.Repositories.Interfaces;
+using PcShop.Areas.Ads.Services.Interfaces;
 
-namespace PcShop.Ads.Services;
+namespace PcShop.Areas.Ads.Services;
 
 public class AdService : IAdService
 {
@@ -38,4 +38,8 @@ public class AdService : IAdService
 
     public Task<List<ReportRowDto>> AdminReportAsync(DateTime from, DateTime to)
         => _adRepo.AdminReportAsync(from, to);
+    public async Task TrackClickAsync(int adId, string positionCode)
+    {
+        await _adRepo.IncrementClickAsync(adId, positionCode);
+    }
 }

@@ -1,6 +1,6 @@
-﻿using PcShop.Ads.Dtos;
+﻿using PcShop.Areas.Ads.Dtos;
 
-namespace PcShop.Ads.Repositories.Interfaces;
+namespace PcShop.Areas.Ads.Repositories.Interfaces;
 
 public interface IPositionRepository
 {

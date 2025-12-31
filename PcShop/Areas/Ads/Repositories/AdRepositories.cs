@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PcShop.Ads.Dtos;
-using PcShop.Ads.Repositories.Interfaces;
+using PcShop.Areas.Ads.Dtos;
+using PcShop.Areas.Ads.Repositories.Interfaces;
 using PcShop.Models;
 using System.Data.SqlClient;
 
-namespace PcShop.Ads.Repositories;
+namespace PcShop.Areas.Ads.Repositories;
 
 public class AdRepository : IAdRepository
 {
@@ -200,4 +200,28 @@ public class AdRepository : IAdRepository
 
         return await query.ToListAsync();
     }
+    public async Task IncrementClickAsync(int adId, string positionCode)
+    {
+        var posId = await _context.Positions
+            .Where(p => p.Code == positionCode)
+            .Select(p => (int?)p.PositionId)
+            .FirstOrDefaultAsync();
+
+        if (posId == null) return;
+
+        var today = DateOnly.FromDateTime(DateTime.Now);
+
+        await _context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE dbo.AdsReport
+SET Clicks = Clicks + 1
+WHERE AdId = {adId} AND PositionId = {posId} AND [Date] = {today};
+
+IF @@ROWCOUNT = 0
+BEGIN
+    INSERT INTO dbo.AdsReport (AdId, Clicks, [Date], PositionId, CreatedAt)
+    VALUES ({adId}, 1, {today}, {posId}, {today});
+END
+");
+    }
 }
+

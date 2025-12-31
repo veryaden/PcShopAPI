@@ -1,6 +1,6 @@
-﻿using PcShop.Ads.Dtos;
+﻿using PcShop.Areas.Ads.Dtos;
 
-namespace PcShop.Ads.Services.Interfaces;
+namespace PcShop.Areas.Ads.Services.Interfaces;
 
 public interface IAdService
 {
@@ -15,4 +15,6 @@ public interface IAdService
     Task AdminUpdateAdAsync(int adId, AdUpsertDto dto);
     Task AdminDeleteAdAsync(int adId);
     Task<List<ReportRowDto>> AdminReportAsync(DateTime from, DateTime to);
+    Task TrackClickAsync(int adId, string positionCode);
+    
 }

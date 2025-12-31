@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PcShop.Ads.Dtos;
-using PcShop.Ads.Repositories.Interfaces;
+using PcShop.Areas.Ads.Dtos;
+using PcShop.Areas.Ads.Repositories.Interfaces;
 using PcShop.Models;
 using System.Data.SqlClient;
 
-namespace PcShop.Ads.Repositories;
+namespace PcShop.Areas.Ads.Repositories;
 
 
 public class PositionRepository : IPositionRepository

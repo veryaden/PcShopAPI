@@ -1,4 +1,4 @@
-﻿namespace PcShop.Ads.Dtos;
+﻿namespace PcShop.Areas.Ads.Dtos;
 
 public class ReportRowDto
 {

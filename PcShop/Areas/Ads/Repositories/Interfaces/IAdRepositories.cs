@@ -1,6 +1,6 @@
-﻿using PcShop.Ads.Dtos;
+﻿using PcShop.Areas.Ads.Dtos;
 
-namespace PcShop.Ads.Repositories.Interfaces;
+namespace PcShop.Areas.Ads.Repositories.Interfaces;
 
 public interface IAdRepository
 {
@@ -14,4 +14,6 @@ public interface IAdRepository
     Task AdminUpdateAdAsync(int adId, AdUpsertDto dto);
     Task AdminDeleteAdAsync(int adId);
     Task<List<ReportRowDto>> AdminReportAsync(DateTime from, DateTime to);
+
+    Task IncrementClickAsync(int adId, string positionCode);
 }
