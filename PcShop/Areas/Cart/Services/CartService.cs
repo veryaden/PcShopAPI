@@ -26,10 +26,10 @@ namespace PcShop.Areas.Cart.Services
                     id = ci.CartItemId,
                     name = ci.Sku.Product.ProductName,
                     spec = ci.Sku.Skuname,
-                    price = (int)(ci.Sku.Product.BasePrice + ci.Sku.PriceAdjustment),
+                    price = (int)Math.Round(ci.Sku.Product.BasePrice + ci.Sku.PriceAdjustment, MidpointRounding.AwayFromZero),
                     quantity = ci.Quantity,
                     imageUrl = ci.Sku.Product.ProductImages
-                        .Where(pi => pi.IsMainOrNot == 1)
+                        //.Where(pi => pi.IsMainOrNot !== 1) //抓圖片的.但目前設定是Null所以先註解
                         .Select(pi => pi.ImageUrl)
                         .FirstOrDefault() ?? "default.jpg",
                     selected = true // Default to true or however you want to handle this
@@ -41,8 +41,8 @@ namespace PcShop.Areas.Cart.Services
 
         public bool UpdateCart(int userId, CartItemModel model)
         {
-            var query = _context.CartItems
-                .Where(o => o.Cart.UserId == userId && o.Skuid == model.CartItemId)
+           var query = _context.CartItems
+        .Where(o => o.Cart.UserId == userId && o.CartItemId == model.CartItemId) 
                 .FirstOrDefault();
 
             if (query == null)
@@ -141,7 +141,7 @@ namespace PcShop.Areas.Cart.Services
                 })
                 .ToList();
 
-            decimal cartTotal = cartItems.Sum(ci => ci.Price * ci.Quantity);
+            decimal cartTotal = cartItems.Sum(ci => Math.Round(ci.Price, 0, MidpointRounding.AwayFromZero) * ci.Quantity);
 
             // 檢查優惠券狀態 (是否領取、是否使用、是否過期) (MinOrderAmount)
             if (cartTotal < userCoupon.Coupon.MinOrderAmount)
@@ -178,8 +178,8 @@ namespace PcShop.Areas.Cart.Services
             {
                 Success = true,
                 Message = "優惠券套用成功",
-                DiscountAmount = Math.Round(discountAmount, 0),
-                FinalTotal = Math.Round(cartTotal - discountAmount, 0)
+                DiscountAmount = Math.Round(discountAmount, 0, MidpointRounding.AwayFromZero),
+                FinalTotal = Math.Round(cartTotal - discountAmount, 0, MidpointRounding.AwayFromZero)
             };
         }
         public UserCouponDto GetCouponsData(string couponsCode)
