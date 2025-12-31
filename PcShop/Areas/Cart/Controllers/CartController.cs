@@ -80,9 +80,9 @@ namespace PcShop.Areas.Cart.Controllers
         [HttpGet]
         [Authorize]
         [Route("Coupons")]
-        public IActionResult GetCoupons()
+        public IActionResult GetCoupons() 
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier); //用Token找User的方法
             if (string.IsNullOrEmpty(userIdClaim))
             {
                 return Unauthorized("無效的使用者身分");

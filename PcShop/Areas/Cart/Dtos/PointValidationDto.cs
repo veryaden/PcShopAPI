@@ -31,5 +31,10 @@ namespace PcShop.Areas.Cart.Dtos
         /// 最終總金額
         /// </summary>
         public decimal FinalTotal { get; set; }
+
+        /// <summary>
+        /// 使用者目前總可用點數
+        /// </summary>
+        public int TotalAvailablePoints { get; set; }
     }
 }

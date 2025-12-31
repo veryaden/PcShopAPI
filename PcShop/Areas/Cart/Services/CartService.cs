@@ -172,7 +172,7 @@ namespace PcShop.Areas.Cart.Services
                 FinalTotal = Math.Round(cartTotal - discountAmount, 0, MidpointRounding.AwayFromZero)
             };
         }
-        public UserCouponDto GetCouponsData(string couponsCode)
+        public UserCouponDto GetCouponsData(string couponsCode)  //有人手把手教學指出來
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
             var query = _context.Coupons.Where(c => c.CouponCode == couponsCode && 
@@ -231,7 +231,8 @@ namespace PcShop.Areas.Cart.Services
                 { 
                     Success = false, 
                     Message = $"點數不足，目前可用點數為 {availablePoints} 點",
-                    PointDiscount = 0
+                    PointDiscount = 0,
+                    TotalAvailablePoints = availablePoints
                 };
             }
 
@@ -258,7 +259,8 @@ namespace PcShop.Areas.Cart.Services
                         OriginalTotal = cartTotal,
                         CouponDiscount = 0,
                         PointDiscount = 0,
-                        FinalTotal = cartTotal
+                        FinalTotal = cartTotal,
+                        TotalAvailablePoints = availablePoints
                     };
                 }
             }
@@ -278,7 +280,8 @@ namespace PcShop.Areas.Cart.Services
                 OriginalTotal = cartTotal,
                 CouponDiscount = couponDiscount,
                 PointDiscount = pointDiscount,
-                FinalTotal = cartTotal - couponDiscount - pointDiscount
+                FinalTotal = cartTotal - couponDiscount - pointDiscount,
+                TotalAvailablePoints = availablePoints
             };
         }
 
@@ -296,6 +299,5 @@ namespace PcShop.Areas.Cart.Services
 
             return cartItems.Sum(ci => Math.Round(ci.Price, 0, MidpointRounding.AwayFromZero) * ci.Quantity);
         }
-
     }
 }
