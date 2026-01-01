@@ -1,22 +1,23 @@
 ﻿using Google.Apis.Auth;
 using Humanizer;
+using MailKit;
+using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MimeKit;
+using Org.BouncyCastle.Security;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.DTO;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
 using System.Linq.Dynamic.Core;
 using System.Linq.Dynamic.Core.Tokenizer;
-using System.Security.Claims;
-using MailKit;
 using System.Net.Mail;
-using MailKit.Net.Smtp;
-using Org.BouncyCastle.Security;
+using System.Security.Claims;
+using static PcShop.Areas.Users.DTO.CompleteProfileRequestDTO;
 
 
 namespace PcShop.Areas.Users.Data
@@ -81,6 +82,27 @@ namespace PcShop.Areas.Users.Data
                         UnitPriceAtPurchase= oi.PriceAtPurchase
                     };
                 }).ToList()
+            };
+        }
+
+
+        //Dashboard
+        public async Task<AdminDashboardOverviewDto> GetOverviewAsync()
+        {
+            var now = DateTime.Now;
+            var year = now.Year;
+            var month = now.Month;
+
+            return new AdminDashboardOverviewDto
+            {
+                Dashboard = new DashboardSummaryDto
+                {
+                    TotalMembers = await _admin.GetTotalMembersAsync(),
+                    YearlyRevenue = await _admin.GetYearlyRevenueAsync(year),
+                    MonthOrders = await _admin.GetMonthOrdersAsync(year, month),
+                    AvgOrderAmount = await _admin.GetAvgOrderAmountAsync()
+                },
+                YearlyRevenue = await _admin.GetMonthlyRevenueAsync(year)
             };
         }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PcShop.Areas.Ads.Services;
 using PcShop.Areas.IUsers.Interface;
 using PcShop.Areas.Users.Data;
 using System.Security.Claims;
@@ -50,5 +51,12 @@ namespace PcShop.Areas.Users.Controllers
             return Ok(result);
         }
 
+        //DashBoard
+        [HttpGet("overview")]
+        public async Task<IActionResult> GetOverview()
+        {
+            var result = await _admin.GetOverviewAsync();
+            return Ok(result);
+        }
     }
 }
