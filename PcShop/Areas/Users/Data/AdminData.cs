@@ -4,6 +4,7 @@ using PcShop.Areas.Users.DTO;
 using PcShop.Areas.Users.Interface;
 using PcShop.Models;
 using System.Linq.Dynamic.Core;
+using static PcShop.Areas.Users.DTO.CompleteProfileRequestDTO;
 
 namespace PcShop.Areas.Users.Data
 {
@@ -31,7 +32,7 @@ namespace PcShop.Areas.Users.Data
             if (!string.IsNullOrWhiteSpace(orderno))
                 query = query.Where(o => o.OrderNo.Contains(orderno));
 
-            var total = query.Count();
+            var total = await query.CountAsync();
             var items = await query
                 .OrderByDescending(o => o.CreateDate)
                 .Skip((page - 1) * pageSize)
@@ -57,6 +58,39 @@ namespace PcShop.Areas.Users.Data
                     .ThenInclude(p => p.ProductImages)
         .FirstOrDefaultAsync(o =>
             o.OrderId == orderId);
+        }
+
+
+        //Dashboard
+        public Task<int> GetTotalMembersAsync()
+       => _context.UserProfiles.CountAsync();
+
+        public Task<decimal> GetYearlyRevenueAsync(int year)
+            => _context.Orders
+                .Where(o => o.CreateDate.Year == year && o.OrderStatus == Convert.ToInt32(OrderStatus.Completed))
+                .SumAsync(o => o.TotalAmount);
+
+        public Task<int> GetMonthOrdersAsync(int year, int month)
+            => _context.Orders
+                .CountAsync(o => o.CreateDate.Year == year && o.CreateDate.Month == month);
+
+        public async Task<decimal> GetAvgOrderAmountAsync()
+            => await _context.Orders
+                .Where(o => o.OrderStatus == Convert.ToInt32(OrderStatus.Completed))
+                .AverageAsync(o => (decimal?)o.TotalAmount) ?? 0;
+
+        public async Task<List<MonthlyRevenueDto>> GetMonthlyRevenueAsync(int year)
+        {
+            return await _context.Orders
+                .Where(o => o.CreateDate.Year == year && o.OrderStatus == Convert.ToInt32(OrderStatus.Completed))
+                .GroupBy(o => o.CreateDate.Month)
+                .Select(g => new MonthlyRevenueDto
+                {
+                    Month = g.Key,
+                    Amount = g.Sum(x => x.TotalAmount)
+                })
+                .OrderBy(x => x.Month)
+                .ToListAsync();
         }
 
     }
