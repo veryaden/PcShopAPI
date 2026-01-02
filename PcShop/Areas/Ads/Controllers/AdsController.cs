@@ -1,44 +1,36 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PcShop.Areas.Ads.Dtos;
+using PcShop.Areas.Ads.Services;
 using PcShop.Areas.Ads.Services.Interfaces;
 
-namespace PcShop.Areas.Ads.Controllers
+namespace PcShop.Areas.Ads.Controllers;
+
+[ApiController]
+[Route("api/ads")]
+public class AdsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/ads")]
-    public class AdsController : ControllerBase
+    private readonly IAdService _service;
+
+    public AdsController(IAdService service)
     {
-        private readonly IAdService _service;
+        _service = service;
+    }
 
-        public AdsController(IAdService service)
-        {
-            _service = service;
-        }
+    [HttpGet("positions")]
+    public async Task<IActionResult> Positions()
+        => Ok(await _service.GetPositionsAsync());
 
-        // GET /api/ads?positionCode=HOME_CAROUSEL
-        [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string positionCode)
-            => Ok(await _service.GetAdsAsync(positionCode));
+    [HttpGet("slot/{positionCode}")]
+    public async Task<IActionResult> Slot(string positionCode)
+        => Ok(await _service.GetSlotAsync(positionCode));
 
-        // GET /api/ads/positions  (後台下拉選單用)
-        [HttpGet("positions")]
-        public async Task<IActionResult> Positions()
-            => Ok(await _service.GetPositionsAsync());
+    [HttpPost("track/click")]
+    public async Task<IActionResult> TrackClick([FromBody] TrackClickDto dto)
+    {
+        if (dto == null || dto.AdId <= 0 || string.IsNullOrWhiteSpace(dto.PositionCode))
+            return BadRequest("Invalid payload");
 
-        // POST /api/ads  (新增/修改)
-        [HttpPost]
-        public async Task<IActionResult> Upsert([FromBody] AdUpsertDto dto)
-        {
-            await _service.UpsertAsync(dto);
-            return Ok(new { success = true });
-        }
-
-        // POST /api/ads/{adId}/click  (點擊統計)
-        [HttpPost("{adId:int}/click")]
-        public async Task<IActionResult> Click(int adId)
-        {
-            await _service.TrackClickAsync(adId);
-            return Ok(new { success = true });
-        }
+        await _service.TrackClickAsync(dto.AdId, dto.PositionCode.Trim());
+        return NoContent();
     }
 }

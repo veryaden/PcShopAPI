@@ -1,10 +1,9 @@
-﻿using PcShop.Models;
+﻿using PcShop.Areas.Ads.Dtos;
 
-namespace PcShop.Areas.Ads.Repositories.Interfaces
+namespace PcShop.Areas.Ads.Repositories.Interfaces;
+
+public interface IPositionRepository
 {
-    public interface IPositionRepository
-    {
-        Task<List<Position>> GetActivePositionsAsync();
-        Task<Position?> GetAsync(int positionId);
-    }
+    Task<List<PositionDto>> GetPositionsAsync();
+    Task<int?> GetPositionIdByCodeAsync(string code);
 }

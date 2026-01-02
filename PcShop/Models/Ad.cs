@@ -23,6 +23,10 @@ public partial class Ad
 
     public bool Status { get; set; }
 
+    public string Type { get; set; }
+
+    public DateOnly? CreatedAt { get; set; }
+
     public virtual ICollection<AdsReport> AdsReports { get; set; } = new List<AdsReport>();
 
     public virtual Position Position { get; set; }
