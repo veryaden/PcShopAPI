@@ -93,8 +93,11 @@ builder.Services
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
             ),
 
-            NameClaimType = JwtRegisteredClaimNames.Sub
+            NameClaimType = "sub" // 讓 Controller 可透過 User.Identity.Name 拿到 userId
         };
+        // -------- 修改點：取消 JWT Claim 自動映射，保留原始 claim --------
+        options.MapInboundClaims = false;
+        // 這樣 User.FindFirst("sub") 才能正確抓到 token 的 sub claim
     });
 
 
@@ -122,6 +125,14 @@ builder.Services.AddScoped<IAdService, AdService>();
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 var app = builder.Build();
+// ---- 新增：確認目前連線的資料庫 ----
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ExamContext>();
+    Console.WriteLine("Current DB Connection: " + context.Database.GetDbConnection().ConnectionString);
+}
+// --------------------------------------
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
