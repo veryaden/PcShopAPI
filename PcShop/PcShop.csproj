@@ -23,6 +23,13 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
 	</ItemGroup>
 
+	<!-- �֤� Web API / MVC �䴩 -->
+  <ItemGroup>
+    <Folder Include="Areas\OrderItems\Dtos\" />
+    <Folder Include="Areas\Users\Models\" />
+    <Folder Include="Areas\Users\Views\" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="efpt.config.json.user" />
   </ItemGroup>
