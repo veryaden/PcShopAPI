@@ -7,6 +7,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Areas\ECPay\Controllers\ValuesController.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
@@ -24,6 +28,7 @@
 
 	<!-- �֤� Web API / MVC �䴩 -->
   <ItemGroup>
+    <Folder Include="Areas\ECPay\Repositories\" />
     <Folder Include="Areas\OrderItems\Dtos\" />
     <Folder Include="Areas\Users\Models\" />
     <Folder Include="Areas\Users\Views\" />
