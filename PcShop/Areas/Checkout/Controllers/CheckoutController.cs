@@ -35,6 +35,27 @@ namespace PcShop.Areas.Checkout.Controllers
             var user = _checkoutService.GetUser(userId);
             return Ok(user);
         }
-    }
 
+        [HttpGet]
+        [Authorize]
+        [Route("Summary")]
+        public IActionResult GetSummary([FromQuery] string couponCode = null)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized();
+            }
+
+            int userId = int.Parse(userIdClaim);
+            var summary = _checkoutService.GetCheckoutData(userId, couponCode);
+            
+            if (summary == null)
+            {
+                return NotFound("購物車沒有商品");
+            }
+
+            return Ok(summary);
+        }
+    }
 }
