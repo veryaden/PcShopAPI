@@ -21,7 +21,7 @@ namespace PcShop.Areas.Checkout.Services
                     FullName = u.FullName,
                     Email = u.Mail,
                     Phone = u.Phone,
-                    Address =u.Address
+                    ShippingAddress = u.ShippingAddress
                 }).FirstOrDefault();
 
             return query;

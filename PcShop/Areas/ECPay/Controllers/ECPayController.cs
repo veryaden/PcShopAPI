@@ -28,6 +28,7 @@ namespace PcShop.Areas.ECPay.Controllers
         {
             var result = await _ecpayService.ProcessPaymentResult(Request.Form);
             return Content(result);
+
         }
     }
 }
