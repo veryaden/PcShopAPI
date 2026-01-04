@@ -16,10 +16,7 @@ namespace PcShop.Areas.Users.Controllers
         {
             _order = order;
         }
-        public IActionResult Ping()
-        {
-            return Ok("Order OK");
-        }
+
         private int GetUserIdOrThrow()
         {
             // 常見：ClaimTypes.NameIdentifier (例如 "1")
@@ -39,13 +36,14 @@ namespace PcShop.Areas.Users.Controllers
         }
         [Authorize]
         [HttpGet("orders")]
-        public async Task<IActionResult> GetMyOrders([FromQuery] OrderStatus? status)
+        public async Task<IActionResult> GetMyOrders([FromQuery] OrderStatus? status, string? orderno, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             int userId = GetUserIdOrThrow();
 
-            var result = await _order.GetOrderListAsync(userId, status);
+            var result = await _order.GetOrderListAsync(userId, status, orderno, page, pageSize);
             return Ok(result);
         }
+
 
         [Authorize]
         [HttpGet("orders/{orderId}")]
