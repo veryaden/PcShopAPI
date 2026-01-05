@@ -345,6 +345,13 @@ namespace PcShop.Areas.Users.Data
 
             return user.ImageUrl;
         }
+
+
+        //抓可使用總點數
+        public async Task<int> GetMyAvailablePointsAsync(int userId)
+        {
+            return await _member.GetUserAvailablePointsAsync(userId);
+        }
     }
 }
 

@@ -11,5 +11,6 @@ namespace PcShop.Areas.Users.Interface
         Task SaveAsync();
 
         Task<UserProfile?> GetUserByEmailTokenAsync(string token);
+        Task<int> GetUserAvailablePointsAsync(int userId);
     }
 }
