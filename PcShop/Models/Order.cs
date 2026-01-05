@@ -62,6 +62,20 @@ public partial class Order
     /// </summary>
     public string SelectedPayment { get; set; }
 
+    public string ReceiverName { get; set; }
+
+    public string ReceiverPhone { get; set; }
+
+    public decimal ShippingFee { get; set; }
+
+    public int UsedPoints { get; set; }
+
+    public decimal DiscountAmount { get; set; }
+
+    public int? UserCouponId { get; set; }
+
+    public virtual ICollection<GamePoint> GamePoints { get; set; } = new List<GamePoint>();
+
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public virtual ICollection<PaymentLogsEcpay> PaymentLogsEcpays { get; set; } = new List<PaymentLogsEcpay>();
@@ -70,5 +84,7 @@ public partial class Order
 
     public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; } = new List<PaymentTransaction>();
 
-    public virtual UserProfile User { get; set; }
+    public virtual ShippingMethod ShippingMethod { get; set; }
+
+    public virtual UserCoupon UserCoupon { get; set; }
 }

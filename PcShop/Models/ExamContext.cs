@@ -71,6 +71,8 @@ public partial class ExamContext : DbContext
 
     public virtual DbSet<Record> Records { get; set; }
 
+    public virtual DbSet<ShippingMethod> ShippingMethods { get; set; }
+
     public virtual DbSet<UserCoupon> UserCoupons { get; set; }
 
     public virtual DbSet<UserProfile> UserProfiles { get; set; }
@@ -158,6 +160,9 @@ public partial class ExamContext : DbContext
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasComment("最後修改時間")
                 .HasColumnType("datetime");
+            entity.Property(e => e.SessionKey)
+                .HasDefaultValueSql("(newid())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF_Carts_SessionKey");
             entity.Property(e => e.UserId)
                 .HasComment("所屬用戶ID (未登入訪客為 NULL)")
                 .HasColumnName("UserID");
@@ -330,12 +335,19 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.UserPointId).HasName("PK__GamePoin__9F29502E2A4F2EA1");
 
+            entity.Property(e => e.UserPointId).HasComment("");
             entity.Property(e => e.ExpiredAt).HasColumnType("datetime");
             entity.Property(e => e.ObtainedAt).HasColumnType("datetime");
             entity.Property(e => e.Source)
                 .IsRequired()
                 .HasMaxLength(20);
-            entity.Property(e => e.UsedAt).HasColumnType("datetime");
+            entity.Property(e => e.UsedAt)
+                .HasComment("使用時間")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.UsedInOrder).WithMany(p => p.GamePoints)
+                .HasForeignKey(d => d.UsedInOrderId)
+                .HasConstraintName("FK_GamePoints_Orders");
 
             entity.HasOne(d => d.User).WithMany(p => p.GamePoints)
                 .HasForeignKey(d => d.UserId)
@@ -417,12 +429,15 @@ public partial class ExamContext : DbContext
                 .HasComment("下單時間")
                 .HasAnnotation("Relational:DefaultConstraintName", "DF__Orders__CreateDa__73FA27A5")
                 .HasColumnType("datetime");
+            entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.OrderNo)
                 .IsRequired()
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasComment("訂單單號");
             entity.Property(e => e.OrderStatus).HasComment("訂單狀態,用數字表示");
+            entity.Property(e => e.ReceiverName).HasMaxLength(100);
+            entity.Property(e => e.ReceiverPhone).HasMaxLength(20);
             entity.Property(e => e.SelectedGateway)
                 .HasMaxLength(20)
                 .IsUnicode(false)
@@ -435,6 +450,7 @@ public partial class ExamContext : DbContext
                 .IsRequired()
                 .HasMaxLength(500)
                 .HasComment("寄送地址");
+            entity.Property(e => e.ShippingFee).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.ShippingMethodId)
                 .HasComment("配送方式ID")
                 .HasColumnName("ShippingMethodID");
@@ -448,10 +464,14 @@ public partial class ExamContext : DbContext
                 .HasComment("下單用戶ID")
                 .HasColumnName("UserID");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.ShippingMethod).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.ShippingMethodId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_User");
+
+            entity.HasOne(d => d.UserCoupon).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.UserCouponId)
+                .HasConstraintName("FK_Orders_UserCoupons");
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
@@ -780,6 +800,26 @@ public partial class ExamContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Records_User");
+        });
+
+        modelBuilder.Entity<ShippingMethod>(entity =>
+        {
+            entity.Property(e => e.ShippingMethodId).HasColumnName("ShippingMethodID");
+            entity.Property(e => e.LogisticsSubType)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasComment("綠界參數：物流子類型");
+            entity.Property(e => e.LogisticsType)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasComment("綠界參數：物流類型");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasComment("顯示名稱 (例：黑貓宅配、7-11取貨)");
+            entity.Property(e => e.Price)
+                .HasComment("基礎運費 (例：100, 60)")
+                .HasColumnType("decimal(18, 2)");
         });
 
         modelBuilder.Entity<UserCoupon>(entity =>

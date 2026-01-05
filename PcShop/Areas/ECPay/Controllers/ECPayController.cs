@@ -16,12 +16,12 @@ namespace PcShop.Areas.ECPay.Controllers
             _ecpayService = ecpayService;
         }
 
-        [HttpPost("GetPaymentParams")]
-        public async Task<IActionResult> GetPaymentParams([FromBody] ECPayDto request)
-        {
-            var parameters = await _ecpayService.GetECPayParameters(request);
-            return Ok(parameters);
-        }
+        //[HttpPost("GetPaymentParams")]
+        //public async Task<IActionResult> GetPaymentParams([FromBody] ECPayDto request)
+        //{
+        //    var parameters = await _ecpayService.GetECPayParameters(request);
+        //    return Ok(parameters);
+        //}
 
         [HttpPost("Callback")]
         public async Task<IActionResult> Callback()
