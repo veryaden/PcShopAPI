@@ -4,7 +4,8 @@ namespace PcShop.Areas.ECPay.Repositories
 {
     public interface IECPayService
     {
-        Task<Dictionary<string, string>> GetECPayParameters(ECPayDto request);
+        Task<Dictionary<string, string>> GetECPayParameters(ECPayRequestDto request);
         Task<string> ProcessPaymentResult(IFormCollection payInfo);
     }
 }
+

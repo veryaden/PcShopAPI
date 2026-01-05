@@ -5,6 +5,6 @@ namespace PcShop.Areas.Checkout.Repositories
     public interface ICheckoutService
     {
         UserProfilesDto GetUser(int userId);
-        CheckoutDto GetCheckoutData(int userId, string couponCode = null);
+        int CreateOrder(int userId, CreateOrderDto dto);
     }
 }

@@ -19,5 +19,7 @@ public partial class UserCoupon
 
     public virtual Coupon Coupon { get; set; }
 
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
     public virtual UserProfile User { get; set; }
 }

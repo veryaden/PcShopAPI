@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PcShop.Areas.Cart.Repositories;
 using PcShop.Areas.Cart.Services;
+using PcShop.Areas.Checkout.Dtos;
 using PcShop.Areas.Checkout.Repositories;
 using PcShop.Areas.Checkout.Services;
 using System.Security.Claims;
@@ -35,11 +36,10 @@ namespace PcShop.Areas.Checkout.Controllers
             var user = _checkoutService.GetUser(userId);
             return Ok(user);
         }
-
-        [HttpGet]
+        [HttpPost]
         [Authorize]
-        [Route("Summary")]
-        public IActionResult GetSummary([FromQuery] string couponCode = null)
+        [Route("Create")]
+        public IActionResult CreateOrder([FromBody] CreateOrderDto dto)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdClaim))
@@ -48,14 +48,15 @@ namespace PcShop.Areas.Checkout.Controllers
             }
 
             int userId = int.Parse(userIdClaim);
-            var summary = _checkoutService.GetCheckoutData(userId, couponCode);
-            
-            if (summary == null)
+            try
             {
-                return NotFound("購物車沒有商品");
+                int orderId = _checkoutService.CreateOrder(userId, dto);
+                return Ok(new { success = true, orderId = orderId });
             }
-
-            return Ok(summary);
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
     }
 }
