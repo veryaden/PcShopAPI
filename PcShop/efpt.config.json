@@ -135,6 +135,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[ShippingMethods]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[user_questions]",
          "ObjectType": 0
       },

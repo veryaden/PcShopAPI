@@ -11,5 +11,6 @@ namespace PcShop.Areas.Cart.Dtos
         public decimal DiscountValue { get; set; } // 對應 Coupon.DiscountValue
         public decimal MinOrderAmount { get; set; } // 對應 Coupon.MinOrderAmount
         public bool IsActive { get; set; }       // 對應 Coupon.IsActive
+
     }
 }

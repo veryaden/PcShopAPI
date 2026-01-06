@@ -28,6 +28,8 @@ using PcShop.Areas.Cart.Services;
 using PcShop.Areas.Checkout.Repositories;
 using PcShop.Areas.Checkout.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using PcShop.Areas.ECPay.Repositories;
+using PcShop.Areas.ECPay.Services;
 
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -103,17 +105,17 @@ builder.Services
 
 //Faq Services and Repositories
 builder.Services.AddScoped<IFaqRepository, FaqRepository>();
-//¡u·í¦³¤H­n IFaqRepository ®É¡A½Ğµ¹¥L¤@­Ó FaqRepository¡v
+//ã€Œç•¶æœ‰äººè¦ IFaqRepository æ™‚ï¼Œè«‹çµ¦ä»–ä¸€å€‹ FaqRepositoryã€
 builder.Services.AddScoped<IFaqService, FaqService>();
 //Game Services and Repositories
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IGamePointRepository, GamePointRepository>();
 builder.Services.AddScoped<IRecordRepository, RecordRepository>();
 builder.Services.AddScoped<GameService>();
-// ¦U¹CÀ¸ Strategy¡]¨C­Ó¹CÀ¸¤@­Ó¡^
+// å„éŠæˆ² Strategyï¼ˆæ¯å€‹éŠæˆ²ä¸€å€‹ï¼‰
 builder.Services.AddScoped<DinoPointCalculator>();
 builder.Services.AddScoped<SnakePointCalculator>();
-// Factory¡]­t³d¡u¿ï½Ö¨Óºâ¡v¡^
+// Factoryï¼ˆè² è²¬ã€Œé¸èª°ä¾†ç®—ã€ï¼‰
 builder.Services.AddScoped<GamePointCalculatorFactory>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ICheckoutService, CheckoutService>();
@@ -121,6 +123,10 @@ builder.Services.AddScoped<ICheckoutService, CheckoutService>();
 builder.Services.AddScoped<IAdRepository, AdRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IAdService, AdService>();
+
+// ECPay Services
+builder.Services.AddScoped<IECPayService, ECPayService>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
@@ -131,7 +137,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     //app.UseSwagger();
-    //app.UseSwaggerUI(); // ³o¦æ¤~¬O¶}±Ò UI ¤¶­±
+    //app.UseSwaggerUI(); // é€™è¡Œæ‰æ˜¯é–‹å•Ÿ UI ä»‹é¢
 }
 
 app.UseHttpsRedirection();

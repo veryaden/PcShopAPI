@@ -69,8 +69,6 @@ public partial class UserProfile
 
     public virtual ICollection<Oauth> Oauths { get; set; } = new List<Oauth>();
 
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-
     public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; } = new List<PaymentTransaction>();
 
     public virtual ICollection<PointHistory> PointHistories { get; set; } = new List<PointHistory>();
