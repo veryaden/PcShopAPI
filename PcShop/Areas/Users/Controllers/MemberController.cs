@@ -44,7 +44,7 @@ namespace PcShop.Areas.Users.Controllers
         [HttpGet("overview")]
         public async Task<IActionResult> Overview()
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            int userId = GetUserIdOrThrow();
             var dto = await _service.GetOverviewAsync(userId);
             return Ok(dto);
         }
