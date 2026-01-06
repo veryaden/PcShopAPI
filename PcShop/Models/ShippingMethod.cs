@@ -9,25 +9,11 @@ public partial class ShippingMethod
 {
     public int ShippingMethodId { get; set; }
 
-    /// <summary>
-    /// 顯示名稱 (例：黑貓宅配、7-11取貨)
-    /// </summary>
     public string Name { get; set; }
 
-    /// <summary>
-    /// 基礎運費 (例：100, 60)
-    /// </summary>
     public decimal Price { get; set; }
 
-    /// <summary>
-    /// 綠界參數：物流類型
-    /// </summary>
     public string LogisticsType { get; set; }
 
-    /// <summary>
-    /// 綠界參數：物流子類型
-    /// </summary>
     public string LogisticsSubType { get; set; }
-
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

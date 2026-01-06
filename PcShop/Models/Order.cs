@@ -38,7 +38,7 @@ public partial class Order
     public string ShippingAddress { get; set; }
 
     /// <summary>
-    /// 訂單狀態,用數字表示
+    /// 1 =&gt; 待付款 2=&gt; 配送中 3=&gt;已完成
     /// </summary>
     public int OrderStatus { get; set; }
 
@@ -84,7 +84,7 @@ public partial class Order
 
     public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; } = new List<PaymentTransaction>();
 
-    public virtual ShippingMethod ShippingMethod { get; set; }
+    public virtual UserProfile User { get; set; }
 
     public virtual UserCoupon UserCoupon { get; set; }
 }

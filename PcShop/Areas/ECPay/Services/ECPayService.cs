@@ -47,7 +47,7 @@ namespace PcShop.Areas.ECPay.Services
                 { "ReturnURL", _configuration["FrontendUrl"] + "/api/ECPay/Callback" }, // 綠界伺服器端回傳
                 { "ChoosePayment", request.ChoosePayment }, // Credit, ATM, CVS
                 { "EncryptType", "1" },
-                { "OrderResultURL", _configuration["FrontendUrl"] + "/checkout/success" }, // 付款完成回傳
+                { "OrderResultURL", _configuration["FrontendUrl"] + "/checkout/success" }, // 付款完成回傳,前端是叫Order-success,要修
                 { "ClientBackURL", _configuration["FrontendUrl"] + "/cart" }, // 回到商店按鈕
             };
 
@@ -129,7 +129,7 @@ namespace PcShop.Areas.ECPay.Services
             return "1|OK";
         }
 
-        private string GetCheckMacValue(Dictionary<string, string> parameters)
+        private string GetCheckMacValue(Dictionary<string, string> parameters) //Dictionary<string, string>這是字典,左邊是key,右邊是Value,可自訂,利用左邊的key找值,一整段為型別
         {
             // 步驟 1：依參數名稱字典排序
             var sortedParams = parameters.OrderBy(p => p.Key)
