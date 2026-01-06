@@ -308,9 +308,9 @@ namespace PcShop.Areas.Users.Data
                 throw new Exception("檔案太大（上限 2MB）");
 
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-            var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp",".gif" };
             if (!allowed.Contains(ext))
-                throw new Exception("只允許 jpg / jpeg / png / webp");
+                throw new Exception("只允許 jpg / jpeg / png / webp /gif");
 
             // ✅ 正確的 WebRoot 路徑
             var folder = Path.Combine(_env.WebRootPath, "uploads", "avatars");
