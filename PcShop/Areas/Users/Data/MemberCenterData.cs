@@ -50,6 +50,13 @@ namespace PcShop.Areas.Users.Data
                 .FirstOrDefaultAsync(u => u.EmailVerifyToken == token);
         }
 
+        public async Task<int> GetUserAvailablePointsAsync(int userId)
+        {
+            return await _context.GamePoints
+                .Where(p => p.UserId == userId && p.Status == 1)
+                .SumAsync(p => p.Points);
+        }
+
     }
 }
 

@@ -103,6 +103,11 @@ namespace PcShop.Areas.Users.Data
             if (await _data.GetUserByEmail(dto.Mail) != null)
                 throw new Exception("Email already exists");
 
+            if(string.IsNullOrWhiteSpace(dto.ShippingAddress))
+            {
+                dto.ShippingAddress = dto.Address;
+            }
+
             var user = new UserProfile
             {
                 FullName = dto.FullName,
@@ -126,7 +131,7 @@ namespace PcShop.Areas.Users.Data
             await _data.SaveAsync();
         }
 
-
+        
         private async Task<UserProfile> HandleGoogleOAuthAsync(string email, string name, string googleSub)
         {
             const string provider = "Google";

@@ -151,5 +151,17 @@ namespace PcShop.Areas.Users.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("points")]
+        public async Task<IActionResult> GetMyPoints()
+        {
+            int userId = GetUserIdOrThrow();
+            var points = await _service.GetMyAvailablePointsAsync(userId);
+
+            return Ok(new
+            {
+                points
+            });
+        }
     }
 }

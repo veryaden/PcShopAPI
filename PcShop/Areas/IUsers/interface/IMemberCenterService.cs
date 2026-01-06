@@ -21,5 +21,6 @@ namespace PcShop.Areas.IUsers.Interface
         Task SendVerifyEmailAsync(int userId, string frontendUrl);
         Task ConfirmEmailAsync(string token);
 
+        Task<int> GetMyAvailablePointsAsync(int userId);
     }
 }

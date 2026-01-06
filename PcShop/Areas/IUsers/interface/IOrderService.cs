@@ -6,7 +6,7 @@ namespace PcShop.Areas.IUsers.Interface
 {
     public interface IOrderService
     {
-        Task<List<OrderListDTO>> GetOrderListAsync(int userId,OrderStatus? status);
+        Task<OrderPagedResult<OrderListDTO>> GetOrderListAsync(int userId, OrderStatus? status, string? orderno, int page, int pageSize);
 
         Task<OrderDetailsDTO> GetOrderDetailAsync(int orderId, int userId);
     }
