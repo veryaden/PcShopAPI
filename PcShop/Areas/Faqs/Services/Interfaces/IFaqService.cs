@@ -8,8 +8,8 @@ namespace PcShop.Areas.Faqs.Services.Interfaces
         // ===== 前台 =====
         Task<List<FaqCategoryDto>> GetCategoriesAsync();
 
-        Task<List<FaqListDto>> GetFaqsAsync(int categoryId);
-        Task<FaqDetailDto?> GetFaqDetailAsync(long faqId);
+        Task<List<FaqListDto>> GetFaqsAsync(int categoryId); //傳入categoryId抓到我的List<FaqListDto>
+        Task<FaqDetailDto?> GetFaqDetailAsync(long faqId); //同上
 
         // ===== 後台 =====
         Task<List<FaqCategoryDto>> GetAllCategoriesForAdminAsync();
