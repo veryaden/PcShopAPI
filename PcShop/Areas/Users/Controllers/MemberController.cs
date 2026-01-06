@@ -37,14 +37,14 @@ namespace PcShop.Areas.Users.Controllers
 
             if (!int.TryParse(idStr, out var userId))
                 throw new UnauthorizedAccessException($"Token userId 不是數字：{idStr}");
-
+            
             return userId;
         }
 
         [HttpGet("overview")]
         public async Task<IActionResult> Overview()
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            int userId = GetUserIdOrThrow();
             var dto = await _service.GetOverviewAsync(userId);
             return Ok(dto);
         }
