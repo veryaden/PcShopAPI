@@ -7,8 +7,10 @@
         public string ReceiverName { get; set; }
         public string ReceiverPhone { get; set; }
 
-        public string SelectedGateway { get; set; }
-        public string SelectedPayment { get; set; }
+        //public string SelectedGateway { get; set; }
+        //public string SelectedPayment { get; set; }
+        public string ShippingMethod { get; set; }
+        public string PaymentMethod { get; set; }
 
         public int? UserCouponId { get; set; }
         public int UsePoints { get; set; }

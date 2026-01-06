@@ -51,12 +51,26 @@ namespace PcShop.Areas.Checkout.Controllers
             try
             {
                 int orderId = _checkoutService.CreateOrder(userId, dto);
-                return Ok(new { success = true, orderId = orderId });
+
+                if (orderId <= 0)
+                {
+                    return BadRequest(new { success = false, message = "建立訂單失敗" });
+                }
+
+                return Ok(new { success = true, orderId });
+                //int orderId = _checkoutService.CreateOrder(userId, dto);
+                //return Ok(new { success = true, orderId = orderId });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { success = false, message = ex.Message });
             }
+
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine(ex); // ⭐ 一定要加
+            //    return BadRequest(new { success = false, message = ex.Message });
+            //}
         }
     }
 }

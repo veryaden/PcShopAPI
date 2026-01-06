@@ -51,9 +51,19 @@ namespace PcShop.Areas.Checkout.Services
                         Math.Round(ci.Sku.Product.BasePrice + ci.Sku.PriceAdjustment, 0, MidpointRounding.AwayFromZero) * ci.Quantity);
 
                     // 3. 取得運費
-                    var shippingMethod = _context.ShippingMethods.Find(dto.ShippingMethodId);
-                    if (shippingMethod == null) throw new Exception("無效的配送方式");
+                    //var shippingMethod = _context.ShippingMethods.Find(dto.ShippingMethodId);
+                    //var shippingMethod = _context.ShippingMethods.FirstOrDefault(s => s.Name == dto.ShippingMethod);
+                    //var shippingMethod = _context.ShippingMethods.FirstOrDefault(s => s.LogisticsType == dto.ShippingMethod);
+                    string dbLogisticsType = dto.ShippingMethod;
+                    if (dto.ShippingMethod == "mainland_delivery")
+                    {
+                        dbLogisticsType = "HOME";
+                    }
+                    var shippingMethod = _context.ShippingMethods.FirstOrDefault(s => s.LogisticsType == dbLogisticsType);
+                    if (shippingMethod == null) throw new Exception($"無效的配送方式: {dto.ShippingMethod}");
                     decimal shippingFee = shippingMethod.Price;
+                    //if (shippingMethod == null) throw new Exception("無效的配送方式");
+                    //decimal shippingFee = shippingMethod.Price;
 
                     // 4. 計算優惠券折扣
                     decimal couponDiscount = 0;
@@ -103,12 +113,15 @@ namespace PcShop.Areas.Checkout.Services
                     {
                         UserId = userId,
                         OrderNo = orderNo,
-                        ShippingMethodId = dto.ShippingMethodId,
+                        //ShippingMethodId = dto.ShippingMethodId,
+                        //ShippingAddress = dto.ShippingAddress,
+                        ShippingMethodId = shippingMethod.ShippingMethodId,
                         ShippingAddress = dto.ShippingAddress,
+
                         ReceiverName = dto.ReceiverName,
                         ReceiverPhone = dto.ReceiverPhone,
-                        SelectedGateway = dto.SelectedGateway,
-                        SelectedPayment = dto.SelectedPayment,
+                        SelectedGateway = dto.ShippingMethod,
+                        SelectedPayment = dto.PaymentMethod,
                         ShippingFee = shippingFee,
                         UsedPoints = pointsToUse,
                         DiscountAmount = couponDiscount + pointsToUse,
@@ -187,7 +200,7 @@ namespace PcShop.Areas.Checkout.Services
 
                     return order.OrderId;
                 }
-                catch (Exception ex)
+                catch (Exception ex) //抓錯誤訊息
                 {
                     transaction.Rollback();
                     throw;
