@@ -30,6 +30,8 @@ using PcShop.Areas.Checkout.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using PcShop.Areas.ECPay.Repositories;
 using PcShop.Areas.ECPay.Services;
+using PcShop.Areas.OrderItems.Repositories;
+using PcShop.Areas.OrderItems.Services;
 
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -49,8 +51,8 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-            //¤W­±¥i¥H¥[https://localhost:4200 ,³o¼Ë¥i¥H¤£¥Î£}¶}¥ş°ì,­n«ç»ò¤U°İAI
-                .WithOrigins("http://localhost:4200")  
+                    //é€™æ¨£å¯ä»¥ä¸ç”¨é–‹å…¨åŸŸå‘¼å«
+                .WithOrigins("http://localhost:4200" , "https://localhost:4200")
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -99,30 +101,31 @@ builder.Services
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
             ),
 
-            NameClaimType = "sub" // Åı Controller ¥i³z¹L User.Identity.Name ®³¨ì userId
+            NameClaimType = "sub" // è®“ Controller å¯é€é User.Identity.Name æ‹¿åˆ° userId
         };
-        // -------- ­×§ïÂI¡G¨ú®ø JWT Claim ¦Û°Ê¬M®g¡A«O¯d­ì©l claim --------
+        // -------- ä¿®æ”¹é»ï¼šå–æ¶ˆ JWT Claim è‡ªå‹•æ˜ å°„ï¼Œä¿ç•™åŸå§‹ claim --------
         options.MapInboundClaims = false;
-        // ³o¼Ë User.FindFirst("sub") ¤~¯à¥¿½T§ì¨ì token ªº sub claim
+        // é€™æ¨£ User.FindFirst("sub") æ‰èƒ½æ­£ç¢ºæŠ“åˆ° token çš„ sub claim
     });
 
 
 //Faq Services and Repositories
 builder.Services.AddScoped<IFaqRepository, FaqRepository>();
-//?Œç•¶?‰äººè¦?IFaqRepository ?‚ï?è«‹çµ¦ä»–ä???FaqRepository??
+//?ğ£¬šè¨œ?åŠçŠ–é–¬?IFaqRepository ?ï¿½?éš¢è® ç­–éšç¢¶???FaqRepository??
 builder.Services.AddScoped<IFaqService, FaqService>();
 //Game Services and Repositories
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IGamePointRepository, GamePointRepository>();
 builder.Services.AddScoped<IRecordRepository, RecordRepository>();
 builder.Services.AddScoped<GameService>();
-// ?„é???Strategyï¼ˆæ??‹é??²ä??‹ï?
+// ?ï¿½???Strategyåš—ï¿½??é’…??è„–??é¡µ?
 builder.Services.AddScoped<DinoPointCalculator>();
 builder.Services.AddScoped<SnakePointCalculator>();
-// Factoryï¼ˆè?è²¬ã€Œé¸èª°ä?ç®—ã€ï?
+// Factoryåš—ï¿½?éç ”ï¿½å±¸ï¿½éš¤å”¬?èğ¨°œï¿½ãµª?
 builder.Services.AddScoped<GamePointCalculatorFactory>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ICheckoutService, CheckoutService>();
+builder.Services.AddScoped<IOrderItemsService, OrderItemsService>();
 
 builder.Services.AddScoped<IAdRepository, AdRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
@@ -135,7 +138,7 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 var app = builder.Build();
-// ---- ·s¼W¡G½T»{¥Ø«e³s½uªº¸ê®Æ®w ----
+// ---- æ–°å¢ï¼šç¢ºèªç›®å‰é€£ç·šçš„è³‡æ–™åº« ----
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ExamContext>();
@@ -149,7 +152,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     //app.UseSwagger();
-    //app.UseSwaggerUI(); // ?™è??æ˜¯?‹å? UI ä»‹é¢
+    //app.UseSwaggerUI(); // ?èº°??é½¿ç³“?è§? UI éšé’…ğ¢’°
 }
 
 app.UseHttpsRedirection();
