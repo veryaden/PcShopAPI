@@ -241,5 +241,83 @@ namespace PcShop.Controllers.Admin
         {
             public string CategoryName { get; set; } = "";
         }
+
+        // -------------------
+        // 取得某商品的 SKU
+        // -------------------
+        [HttpGet("{productId}/skus")]
+        public async Task<IActionResult> GetProductSkus(int productId)
+        {
+            var skus = await _context.ProductSkus
+                .Where(s => s.ProductId == productId)
+                .Select(s => new ProductSkuDto
+                {
+                    Skuid = s.Skuid,
+                    Skuname = s.Skuname,
+                    StockQuantity = s.StockQuantity,
+                    IsOnSale = s.IsOnSale,
+                    PriceAdjustment = s.PriceAdjustment,
+                    IsOutOfStock = s.StockQuantity <= 0
+                })
+                .ToListAsync();
+
+            return Ok(skus);
+        }
+
+        // -------------------
+        // 新增 SKU
+        // -------------------
+        [HttpPost("{productId}/skus")]
+        [Consumes("application/json")]
+        public async Task<IActionResult> CreateSku(int productId, [FromBody] ProductSkuDto dto)
+        {
+            var sku = new ProductSku
+            {
+                ProductId = productId,
+                Skuname = dto.Skuname,
+                StockQuantity = dto.StockQuantity,
+                IsOnSale = dto.IsOnSale,
+                PriceAdjustment = dto.PriceAdjustment
+            };
+
+            _context.ProductSkus.Add(sku);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { sku.Skuid });
+        }
+
+        // -------------------
+        // 更新 SKU
+        // -------------------
+        [HttpPut("skus/{skuid}")]
+        [Consumes("application/json")]
+        public async Task<IActionResult> UpdateSku(int skuid, [FromBody] ProductSkuDto dto)
+        {
+            var sku = await _context.ProductSkus.FindAsync(skuid);
+            if (sku == null) return NotFound();
+
+            sku.Skuname = dto.Skuname;
+            sku.StockQuantity = dto.StockQuantity;
+            sku.IsOnSale = dto.IsOnSale;
+            sku.PriceAdjustment = dto.PriceAdjustment;
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        // -------------------
+        // 刪除 SKU
+        // -------------------
+        [HttpDelete("skus/{skuid}")]
+        public async Task<IActionResult> DeleteSku(int skuid)
+        {
+            var sku = await _context.ProductSkus.FindAsync(skuid);
+            if (sku == null) return NotFound();
+
+            _context.ProductSkus.Remove(sku);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }
