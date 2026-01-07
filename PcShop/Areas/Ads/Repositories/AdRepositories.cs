@@ -145,17 +145,22 @@ public class AdRepository : IAdRepository
 
     public async Task AdminUpdateAdAsync(int adId, AdUpsertDto dto)
     {
-        var entity = await _context.Ads.FirstOrDefaultAsync(x => x.AdId == adId);
-        if (entity == null) return;
+        var ad = await _context.Ads
+            .FirstOrDefaultAsync(a => a.AdId == adId); // ✅ 只用 AdId
 
-        entity.Title = dto.Title;
-        entity.MediaUrl = dto.MediaUrl;
-        entity.LinkUrl = dto.LinkUrl ?? "";
-        entity.PositionId = dto.PositionId == 0 ? null : dto.PositionId;
-        entity.StartTime = dto.StartTime;
-        entity.EndTime = dto.EndTime;
-        entity.Status = dto.Status;
-        entity.Type = dto.Type;
+        if (ad == null)
+            throw new Exception("Ad not found");
+
+        ad.Title = dto.Title;
+        ad.MediaUrl = dto.MediaUrl;
+        ad.LinkUrl = dto.LinkUrl;
+        ad.Type = dto.Type;
+        ad.Status = dto.Status;
+        ad.StartTime = dto.StartTime;
+        ad.EndTime = dto.EndTime;
+
+        // ✔ 可以改位置，但不能用它來找資料
+        ad.PositionId = dto.PositionId;
 
         await _context.SaveChangesAsync();
     }
