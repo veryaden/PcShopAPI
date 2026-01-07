@@ -100,7 +100,7 @@ namespace PcShop.Areas.Users.Data
                     TotalMembers = await _admin.GetTotalMembersAsync(),
                     YearlyRevenue = await _admin.GetYearlyRevenueAsync(year),
                     MonthOrders = await _admin.GetMonthOrdersAsync(year, month),
-                    AvgOrderAmount = await _admin.GetAvgOrderAmountAsync()
+                    AvgOrderAmount = await _admin.GetAvgOrderAmountAsync(year)
                 },
                 YearlyRevenue = await _admin.GetMonthlyRevenueAsync(year)
             };

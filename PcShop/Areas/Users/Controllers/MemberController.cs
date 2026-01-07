@@ -40,7 +40,7 @@ namespace PcShop.Areas.Users.Controllers
             
             return userId;
         }
-
+        [Authorize]
         [HttpGet("overview")]
         public async Task<IActionResult> Overview()
         {
