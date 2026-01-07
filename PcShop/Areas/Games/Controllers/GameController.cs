@@ -28,11 +28,23 @@ namespace PcShop.Areas.Games.Controllers
             if (dto == null)
                 return BadRequest("DTO is null");
 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                return Unauthorized();
+            // ✅ 穩定抓 userId（同時支援 NameIdentifier / sub）
+            var userIdStr =
+                User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub");
 
-            int userId = int.Parse(userIdClaim.Value);
+            if (string.IsNullOrEmpty(userIdStr))
+                return Unauthorized("UserId claim not found");
+
+            if (!int.TryParse(userIdStr, out int userId))
+                return Unauthorized("Invalid UserId claim");
+
+            // ✅ 基本防呆（避免資料亂進 DB）
+            if (dto.GameId <= 0)
+                return BadRequest("Invalid GameId");
+
+            if (dto.Score < 0)
+                return BadRequest("Invalid Score");
 
             await _gameService.SubmitScoreAsync(
                 userId,
@@ -40,10 +52,14 @@ namespace PcShop.Areas.Games.Controllers
                 dto.GameId
             );
 
-            return Ok(new { success = true, userId, dto });
+            return Ok(new
+            {
+                success = true,
+                userId,
+                gameId = dto.GameId,
+                score = dto.Score
+            });
         }
-
-
     }
 }
 

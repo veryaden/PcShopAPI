@@ -165,15 +165,31 @@ public class AdRepository : IAdRepository
         await _context.SaveChangesAsync();
     }
 
+    //public async Task AdminDeleteAdAsync(int adId)
+    //{
+    //    var entity = await _context.Ads.FirstOrDefaultAsync(x => x.AdId == adId);
+    //    if (entity == null) return;
+
+    //    _context.Ads.Remove(entity);
+    //    //await _context.SaveChangesAsync();
+    //    try
+    //    {
+    //        await _context.SaveChangesAsync();
+    //    }
+    //    catch (DbUpdateException ex)
+    //    {
+    //        Console.WriteLine(ex.InnerException?.Message);
+    //        throw;
+    //    }
+    //}
     public async Task AdminDeleteAdAsync(int adId)
     {
-        var entity = await _context.Ads.FirstOrDefaultAsync(x => x.AdId == adId);
-        if (entity == null) return;
+        var ad = await _context.Ads.FindAsync(adId);
+        if (ad == null) return;
 
-        _context.Ads.Remove(entity);
+        ad.Status = false; // 關閉
         await _context.SaveChangesAsync();
     }
-
     public async Task<List<ReportRowDto>> AdminReportAsync(DateTime from, DateTime to)
     {
         var start = DateOnly.FromDateTime(from.Date);
