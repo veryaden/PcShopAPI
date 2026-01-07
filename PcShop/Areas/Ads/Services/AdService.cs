@@ -42,4 +42,5 @@ public class AdService : IAdService
     {
         await _adRepo.IncrementClickAsync(adId, positionCode);
     }
+
 }
