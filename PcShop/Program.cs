@@ -49,7 +49,8 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:4200")
+            //¤W­±¥i¥H¥[https://localhost:4200 ,³o¼Ë¥i¥H¤£¥Î£}¶}¥ş°ì,­n«ç»ò¤U°İAI
+                .WithOrigins("http://localhost:4200")  
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -108,17 +109,17 @@ builder.Services
 
 //Faq Services and Repositories
 builder.Services.AddScoped<IFaqRepository, FaqRepository>();
-//ã€Œç•¶æœ‰äººè¦ IFaqRepository æ™‚ï¼Œè«‹çµ¦ä»–ä¸€å€‹ FaqRepositoryã€
+//?Œç•¶?‰äººè¦?IFaqRepository ?‚ï?è«‹çµ¦ä»–ä???FaqRepository??
 builder.Services.AddScoped<IFaqService, FaqService>();
 //Game Services and Repositories
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IGamePointRepository, GamePointRepository>();
 builder.Services.AddScoped<IRecordRepository, RecordRepository>();
 builder.Services.AddScoped<GameService>();
-// å„éŠæˆ² Strategyï¼ˆæ¯å€‹éŠæˆ²ä¸€å€‹ï¼‰
+// ?„é???Strategyï¼ˆæ??‹é??²ä??‹ï?
 builder.Services.AddScoped<DinoPointCalculator>();
 builder.Services.AddScoped<SnakePointCalculator>();
-// Factoryï¼ˆè² è²¬ã€Œé¸èª°ä¾†ç®—ã€ï¼‰
+// Factoryï¼ˆè?è²¬ã€Œé¸èª°ä?ç®—ã€ï?
 builder.Services.AddScoped<GamePointCalculatorFactory>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ICheckoutService, CheckoutService>();
@@ -148,7 +149,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     //app.UseSwagger();
-    //app.UseSwaggerUI(); // é€™è¡Œæ‰æ˜¯é–‹å•Ÿ UI ä»‹é¢
+    //app.UseSwaggerUI(); // ?™è??æ˜¯?‹å? UI ä»‹é¢
 }
 
 app.UseHttpsRedirection();

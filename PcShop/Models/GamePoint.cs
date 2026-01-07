@@ -21,9 +21,6 @@ public partial class GamePoint
 
     public byte Status { get; set; }
 
-    /// <summary>
-    /// 使用時間
-    /// </summary>
     public DateTime? UsedAt { get; set; }
 
     public int? UsedInOrderId { get; set; }

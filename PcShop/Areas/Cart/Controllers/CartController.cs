@@ -21,7 +21,7 @@ namespace PcShop.Areas.Cart.Controllers
         [Authorize]
         public IActionResult GetCart()
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("sub");
             if (string.IsNullOrEmpty(userIdClaim))
             {
                 return Unauthorized();
@@ -38,7 +38,7 @@ namespace PcShop.Areas.Cart.Controllers
         public IActionResult UpdateCart([FromBody] CartItemModel model)
         {
             //取得使用者ID
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("sub");
             //如果沒取得到就回傳401 沒權限的意思
             if (string.IsNullOrEmpty(userIdClaim))
             {
@@ -57,7 +57,7 @@ namespace PcShop.Areas.Cart.Controllers
         public IActionResult DeleteCart(int cartItemId)  
         {
             //取得使用者ID
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("sub");
             //如果沒取得到就回傳401 沒權限的意思,來防止轉型錯誤，更加安全
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
@@ -82,7 +82,7 @@ namespace PcShop.Areas.Cart.Controllers
         [Route("Coupons")]
         public IActionResult GetCoupons() 
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier); //用Token找User的方法
+            var userIdClaim = User.FindFirstValue("sub"); //用Token找User的方法
             if (string.IsNullOrEmpty(userIdClaim))
             {
                 return Unauthorized("無效的使用者身分");
@@ -98,7 +98,7 @@ namespace PcShop.Areas.Cart.Controllers
         [Route("ValidateCoupon")] //取得該會員所有的優惠券
         public IActionResult ValidateCoupon([FromBody] int userCouponId)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("sub");
             if (string.IsNullOrEmpty(userIdClaim))
             {
                 return Unauthorized();
@@ -123,7 +123,7 @@ namespace PcShop.Areas.Cart.Controllers
         [Route("Points")] //取得該會員的點數
         public IActionResult GetPoints()
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("sub");
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
                 return Unauthorized();
@@ -138,7 +138,7 @@ namespace PcShop.Areas.Cart.Controllers
         [Route("ValidatePoints")] //預覽點數折抵後的金額
         public IActionResult ValidatePoints([FromBody] PointValidationRequest request)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("sub");
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
                 return Unauthorized();

@@ -26,7 +26,7 @@ namespace PcShop.Areas.Checkout.Controllers
         public IActionResult GetUser()
         {
             //取得User資訊用法//
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("sub");
             if (string.IsNullOrEmpty(userIdClaim))
             {
                 return Unauthorized();
@@ -41,7 +41,7 @@ namespace PcShop.Areas.Checkout.Controllers
         [Route("Create")]
         public IActionResult CreateOrder([FromBody] CreateOrderDto dto)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue("sub");
             if (string.IsNullOrEmpty(userIdClaim))
             {
                 return Unauthorized();

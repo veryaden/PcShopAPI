@@ -340,15 +340,12 @@ public partial class ExamContext : DbContext
         {
             entity.HasKey(e => e.UserPointId).HasName("PK__GamePoin__9F29502E2A4F2EA1");
 
-            entity.Property(e => e.UserPointId).HasComment("");
             entity.Property(e => e.ExpiredAt).HasColumnType("datetime");
             entity.Property(e => e.ObtainedAt).HasColumnType("datetime");
             entity.Property(e => e.Source)
                 .IsRequired()
                 .HasMaxLength(20);
-            entity.Property(e => e.UsedAt)
-                .HasComment("使用時間")
-                .HasColumnType("datetime");
+            entity.Property(e => e.UsedAt).HasColumnType("datetime");
 
             entity.HasOne(d => d.UsedInOrder).WithMany(p => p.GamePoints)
                 .HasForeignKey(d => d.UsedInOrderId)
@@ -440,7 +437,10 @@ public partial class ExamContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasComment("訂單單號");
-            entity.Property(e => e.OrderStatus).HasComment("訂單狀態,用數字表示");
+            entity.Property(e => e.OrderStatus)
+                .HasDefaultValue(1)
+                .HasComment("1 => 待付款 2=> 配送中 3=>已完成")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF_Orders_OrderStatus");
             entity.Property(e => e.ReceiverName).HasMaxLength(100);
             entity.Property(e => e.ReceiverPhone).HasMaxLength(20);
             entity.Property(e => e.SelectedGateway)
@@ -469,14 +469,14 @@ public partial class ExamContext : DbContext
                 .HasComment("下單用戶ID")
                 .HasColumnName("UserID");
 
-            entity.HasOne(d => d.ShippingMethod).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.ShippingMethodId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Orders_User");
-
             entity.HasOne(d => d.UserCoupon).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserCouponId)
                 .HasConstraintName("FK_Orders_UserCoupons");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Orders_User");
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
@@ -531,7 +531,7 @@ public partial class ExamContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.MerchantTradeNo)
                 .IsRequired()
-                .HasMaxLength(20)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.OrderId).HasColumnName("OrderID");
             entity.Property(e => e.PaymentDate).HasColumnType("datetime");
@@ -809,22 +809,21 @@ public partial class ExamContext : DbContext
 
         modelBuilder.Entity<ShippingMethod>(entity =>
         {
+            entity.HasKey(e => e.ShippingMethodId).HasName("PK__Shipping__0C78338462A42A76");
+
             entity.Property(e => e.ShippingMethodId).HasColumnName("ShippingMethodID");
             entity.Property(e => e.LogisticsSubType)
+                .IsRequired()
                 .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasComment("綠界參數：物流子類型");
+                .IsUnicode(false);
             entity.Property(e => e.LogisticsType)
+                .IsRequired()
                 .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasComment("綠界參數：物流類型");
+                .IsUnicode(false);
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasMaxLength(50)
-                .HasComment("顯示名稱 (例：黑貓宅配、7-11取貨)");
-            entity.Property(e => e.Price)
-                .HasComment("基礎運費 (例：100, 60)")
-                .HasColumnType("decimal(18, 2)");
+                .HasMaxLength(50);
+            entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
         });
 
         modelBuilder.Entity<UserCoupon>(entity =>
