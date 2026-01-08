@@ -195,7 +195,7 @@ namespace PcShop.Areas.Checkout.Services
                         UsedPoints = pointsToUse,
                         DiscountAmount = couponDiscount + pointsToUse,
                         TotalAmount = subtotal + shippingFee - couponDiscount - pointsToUse,
-                        OrderStatus = 0, // 假設 0 是待付款
+                        OrderStatus = 1, // 1 是待付款 (根據 Order.cs 註解)
                         CreateDate = DateTime.Now,
                         UserCouponId = dto.UserCouponId
                     };
