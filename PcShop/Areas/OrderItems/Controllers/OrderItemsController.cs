@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using PcShop.Areas.OrderItems.Repositories;
 using PcShop.Areas.OrderItems.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PcShop.Areas.OrderItems.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrderItemsController : ControllerBase
     {
         private readonly IOrderItemsService _orderItemsService;
@@ -15,17 +17,31 @@ namespace PcShop.Areas.OrderItems.Controllers
             _orderItemsService = orderItemsService;
         }
 
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim)) return 0;
+            return int.Parse(userIdClaim);
+        }
+
         [HttpGet("{orderId}")]
         public async Task<ActionResult<IEnumerable<OrderItemDto>>> GetOrderItems(int orderId)
         {
-            var items = await _orderItemsService.GetOrderItemsAsync(orderId);
+            int userId = GetUserId();
+            if (userId == 0) return Unauthorized();
+
+            var items = await _orderItemsService.GetOrderItemsAsync(orderId, userId);
             return Ok(items);
         }
 
         [HttpGet("detail/{orderId}")]
         public async Task<ActionResult<OrderDetailDto>> GetOrderDetail(int orderId)
         {
-            var detail = await _orderItemsService.GetOrderDetailAsync(orderId);
+            int userId = GetUserId();
+            if (userId == 0) return Unauthorized();
+
+            var detail = await _orderItemsService.GetOrderDetailAsync(orderId, userId);
             if (detail == null) return NotFound();
             return Ok(detail);
         }
