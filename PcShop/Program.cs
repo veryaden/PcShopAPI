@@ -134,7 +134,6 @@ builder.Services.AddScoped<IAdService, AdService>();
 // ECPay Services
 builder.Services.AddScoped<IECPayService, ECPayService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 //builder.Services.AddEndpointsApiExplorer();
