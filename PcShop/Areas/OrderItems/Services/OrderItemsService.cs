@@ -50,14 +50,10 @@ namespace PcShop.Areas.OrderItems.Services
                     OrderNo = o.OrderNo,
                     TotalAmount = o.TotalAmount,
                     OrderStatus = o.OrderStatus,
-                    StatusName = o.OrderStatus switch
-                    {
-                        1 => "待付款",
-                        0 => "待付款",
-                        2 => "配送中",
-                        3 => "已完成",
-                        _ => "未知"
-                    },
+                    StatusName = o.OrderStatus == 1 ? "待付款" :
+                         o.OrderStatus == 0 ? "待付款" :
+                         o.OrderStatus == 2 ? "配送中" :
+                         o.OrderStatus == 3 ? "已完成" : "未知",
                     SelectedPayment = o.SelectedPayment,
                     CreateDate = o.CreateDate,
                     ShippingFee = o.ShippingFee,
@@ -76,7 +72,6 @@ namespace PcShop.Areas.OrderItems.Services
                     CouponDiscountType = o.UserCoupon != null ? o.UserCoupon.Coupon.DiscountType : null,
                     CouponDiscountValue = o.UserCoupon != null ? (decimal?)o.UserCoupon.Coupon.DiscountValue : null,
                     SelectedGateway = o.SelectedGateway,
-                    SelectedPayment = o.SelectedPayment,
                     Items = o.OrderItems.Select(oi => new OrderItemDto
                     {
                         OrderItemId = oi.OrderItemId,

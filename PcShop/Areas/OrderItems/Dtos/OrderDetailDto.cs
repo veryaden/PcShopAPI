@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace PcShop.Areas.OrderItems.Dtos
 {
@@ -8,6 +9,7 @@ namespace PcShop.Areas.OrderItems.Dtos
         public string OrderNo { get; set; }
         public decimal TotalAmount { get; set; }
         public int OrderStatus { get; set; }
+        public string StatusName { get; set; }
         public DateTime CreateDate { get; set; }
         public decimal ShippingFee { get; set; }
         public int UsedPoints { get; set; }
