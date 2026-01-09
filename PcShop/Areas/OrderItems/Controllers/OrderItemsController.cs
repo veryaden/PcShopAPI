@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PcShop.Areas.OrderItems.Repositories;
 using PcShop.Areas.OrderItems.Dtos;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PcShop.Areas.OrderItems.Controllers
 {
@@ -20,8 +20,9 @@ namespace PcShop.Areas.OrderItems.Controllers
 
         private int GetUserId()
         {
-            var userIdClaim = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) 
-                             ?? User.FindFirstValue("sub");
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim)) return 0;
             return int.Parse(userIdClaim);
         }
 
@@ -29,6 +30,8 @@ namespace PcShop.Areas.OrderItems.Controllers
         public async Task<ActionResult<IEnumerable<OrderItemDto>>> GetOrderItems(int orderId)
         {
             int userId = GetUserId();
+            if (userId == 0) return Unauthorized();
+
             var items = await _orderItemsService.GetOrderItemsAsync(orderId, userId);
             return Ok(items);
         }
@@ -37,6 +40,8 @@ namespace PcShop.Areas.OrderItems.Controllers
         public async Task<ActionResult<OrderDetailDto>> GetOrderDetail(int orderId)
         {
             int userId = GetUserId();
+            if (userId == 0) return Unauthorized();
+
             var detail = await _orderItemsService.GetOrderDetailAsync(orderId, userId);
             if (detail == null) return NotFound();
             return Ok(detail);

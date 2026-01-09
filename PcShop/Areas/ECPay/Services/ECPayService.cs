@@ -5,96 +5,102 @@ using PcShop.Models;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace PcShop.Areas.ECPay.Services
 {
     public class ECPayService : IECPayService
     {
+        private readonly IOrderRepository _orderRepo;
         private readonly IPaymentRepository _paymentRepo;
-        private readonly ExamContext _context;
         private readonly IConfiguration _configuration;
 
-        // 預設測試金鑰 (正式環境建議放 appsettings.json)
-        private string MerchantId = "2000132";
-        private string HashKey = "5294y06JSMkS4w4G";
-        private string HashIV = "v77hoKGq4kWxNNuX";
+        // 綠界公開測試帳號參數 (從 RTF 範本確認)
+        private const string MerchantId = "2000132";
+        private const string HashKey = "5294y06JbISpM5x9";
+        private const string HashIV = "v77hoKGq4kWxNNIS";
+        private const string ApiUrl = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5"; //金流網址
 
-        public ECPayService(IPaymentRepository paymentRepo, ExamContext context, IConfiguration configuration)
+        public ECPayService(IOrderRepository orderRepo, IPaymentRepository paymentRepo, IConfiguration configuration)
         {
+            _orderRepo = orderRepo;
             _paymentRepo = paymentRepo;
-            _context = context;
             _configuration = configuration;
         }
 
-        public async Task<Dictionary<string, string>> GetECPayParameters(ECPayRequestDto request)
+        /// <summary>
+        /// 產生綠界支付 HTML 表單
+        /// </summary>
+        public async Task<string> GetECPayParameters(ECPayRequestDto request)
         {
-            // 找尋訂單資訊 (確保訂單存在)
-            var order = await _context.Orders.FindAsync(request.OrderId);
+            // 1. 透過 Repository 取得訂單與明細 (DAL 層分離)
+            var order = await _orderRepo.GetOrderByIdAsync(request.OrderId);
             if (order == null) throw new Exception("Order not found");
 
-            // 生成 MerchantTradeNo (必須唯一，通常是 訂單號 + 時間戳)
-            string merchantTradeNo = order.OrderNo + DateTime.Now.ToString("HHmmss");
+            var orderItems = await _orderRepo.GetOrderItemsByOrderIdAsync(request.OrderId);
 
-            var parameters = new Dictionary<string, string>
+            // 2. 生成 MerchantTradeNo (參考 RTF 邏輯: FZ + 8位ID + 6位時間)
+            // 格式: FZ + OrderID(補滿8位) + 時分秒
+            string timestamp = DateTime.Now.ToString("HHmmss");
+            string merchantTradeNo = "FZ" + order.OrderId.ToString("D8") + timestamp;
+            if (merchantTradeNo.Length > 20) merchantTradeNo = merchantTradeNo.Substring(0, 20);
+
+            // 3. 拼接 ItemName (讀取真實商品名稱)
+            string itemName = string.Join("#", orderItems.Select(item => 
+                $"{item.Sku?.Product?.ProductName ?? "未知商品"} * {item.Quantity}"));
+
+            // 4. 組裝基礎參數
+            var dict = new Dictionary<string, string>
             {
                 { "MerchantID", MerchantId },
                 { "MerchantTradeNo", merchantTradeNo },
                 { "MerchantTradeDate", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") },
                 { "PaymentType", "aio" },
-                { "TotalAmount", request.TotalAmount.ToString() },
-                { "TradeDesc", request.TradeDesc ?? "PcShop Payment" },
-                { "ItemName", request.ItemName ?? "PcShop Goods" },
-                { "ReturnURL", _configuration["FrontendUrl"] + "/api/ECPay/Callback" }, // 綠界伺服器端回傳
-                { "ChoosePayment", request.ChoosePayment }, // Credit, ATM, CVS
+                { "TotalAmount", order.TotalAmount.ToString("0") },
+                { "TradeDesc", request.TradeDesc ?? "PcShop_Order_Payment" },
+                { "ItemName", string.IsNullOrEmpty(itemName) ? "PcShop_Goods" : itemName },
+                { "ReturnURL", _configuration["FrontendUrl"] ?? "https://localhost:7007" + "/api/ECPay/Callback" }, 
+                { "ChoosePayment", request.ChoosePayment ?? "ALL" }, 
                 { "EncryptType", "1" },
-                { "OrderResultURL", _configuration["FrontendUrl"] + "/checkout/success" }, // 付款完成回傳,前端是叫Order-success,要修
-                { "ClientBackURL", _configuration["FrontendUrl"] + "/cart" }, // 回到商店按鈕
+                { "ClientBackURL", "http://localhost:4200/cart" }, // 完成支付後的「返回特店」按鈕
             };
 
-            // 如果是 ATM 或 CVS，可以設定付款資訊回傳網址
-            if (request.ChoosePayment == "ATM" || request.ChoosePayment == "CVS")
-            {
-                parameters.Add("PaymentInfoURL", _configuration["FrontendUrl"] + "/api/ECPay/Callback");
-            }
+            // 5. 計算 CheckMacValue 並加入
+            dict.Add("CheckMacValue", CalculateCheckMacValue(dict));
 
-            // 計算 CheckMacValue
-            parameters.Add("CheckMacValue", GetCheckMacValue(parameters));
-
-            // 記錄 Log
+            // 6. 記錄 Payment Log (DAL 層)
             var log = new PaymentLogsEcpay
             {
-                OrderId = request.OrderId,
+                OrderId = order.OrderId,
                 MerchantTradeNo = merchantTradeNo,
-                TradeAmt = request.TotalAmount,
-                CheckMacValue = parameters["CheckMacValue"],
+                TradeAmt = (int)order.TotalAmount,
+                CheckMacValue = dict["CheckMacValue"],
                 CreateTime = DateTime.Now,
-                RtnMsg = "Initial",
+                RtnMsg = "Initialized",
                 RtnCode = -1
             };
             await _paymentRepo.CreatePaymentLog(log);
 
-            return parameters;
+            // 7. 生成自動提交的 HTML Form
+            return GenerateAutoSubmitForm(dict);
         }
 
         public async Task<string> ProcessPaymentResult(IFormCollection payInfo)
         {
-            // 1. 驗證 CheckMacValue
             var parameters = payInfo.ToDictionary(x => x.Key, x => x.Value.ToString());
             string receivedMac = parameters["CheckMacValue"];
             parameters.Remove("CheckMacValue");
 
-            string calculatedMac = GetCheckMacValue(parameters);
-            if (receivedMac != calculatedMac)
+            if (receivedMac != CalculateCheckMacValue(parameters))
             {
                 return "0|CheckMacValueVerifyFail";
             }
 
-            // 2. 取得回傳資訊
             string merchantTradeNo = parameters["MerchantTradeNo"];
-            string rtnCode = parameters["RtnCode"]; // 1 為成功
-            string paymentType = parameters["PaymentType"];
-
-            // 3. 更新 Log 與 訂單狀態
+            string rtnCode = parameters["RtnCode"]; 
+            
             var log = await _paymentRepo.GetLogByTradeNo(merchantTradeNo);
             if (log != null)
             {
@@ -102,63 +108,57 @@ namespace PcShop.Areas.ECPay.Services
                 log.RtnMsg = parameters["RtnMsg"];
                 log.PaymentDate = DateTime.TryParse(parameters["PaymentDate"], out var pDate) ? pDate : (DateTime?)null;
                 log.TradeNo = parameters["TradeNo"];
-                log.PaymentType = paymentType;
+                log.PaymentType = parameters["PaymentType"];
                 
-                // ATM / CVS 特定參數
-                if (parameters.ContainsKey("BankCode")) log.BankCode = parameters["BankCode"];
-                if (parameters.ContainsKey("vAccount")) log.VAccount = parameters["vAccount"];
-                if (parameters.ContainsKey("PaymentNo")) log.PaymentNo = parameters["PaymentNo"];
-                if (parameters.ContainsKey("ExpireDate")) log.ExpireDate = parameters["ExpireDate"];
-
                 await _paymentRepo.UpdatePaymentLog(log);
 
-                // 如果付款成功 (rtnCode == "1")，更新訂單狀態
+                // 如果付款成功 (RtnCode == 1)，則更新訂單狀態
                 if (rtnCode == "1")
                 {
-                    var order = await _context.Orders.FindAsync(log.OrderId);
-                    if (order != null)
-                    {
-                        order.OrderStatus = 2; // 假設 2 是已付款
-                        order.UpdateDate = DateTime.Now;
-                        order.SelectedPayment = paymentType;
-                        await _context.SaveChangesAsync();
-                    }
+                    await _orderRepo.UpdateOrderStatusAsync(log.OrderId, 1); // 假設 1 為已付款/待出貨
                 }
             }
 
             return "1|OK";
         }
 
-        private string GetCheckMacValue(Dictionary<string, string> parameters) //Dictionary<string, string>這是字典,左邊是key,右邊是Value,可自訂,利用左邊的key找值,一整段為型別
+        private string CalculateCheckMacValue(Dictionary<string, string> parameters)
         {
-            // 步驟 1：依參數名稱字典排序
             var sortedParams = parameters.OrderBy(p => p.Key)
                 .Select(p => $"{p.Key}={p.Value}");
 
-            // 步驟 2：前後加上 HashKey 與 HashIV
             string rawData = $"HashKey={HashKey}&{string.Join("&", sortedParams)}&HashIV={HashIV}";
 
-            // 步驟 3：URL Encode
             string encodedData = HttpUtility.UrlEncode(rawData).ToLower();
 
-            // 綠界特殊的 Encode 補正 (RFC 1738)
-            encodedData = encodedData
-                .Replace("%2d", "-")
-                .Replace("%5f", "_")
-                .Replace("%2e", ".")
-                .Replace("%21", "!")
-                .Replace("%2a", "*")
-                .Replace("%28", "(")
-                .Replace("%29", ")");
-
-            // 步驟 4：SHA256 加密並轉大寫
             using (var sha256 = SHA256.Create())
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(encodedData);
                 byte[] hash = sha256.ComputeHash(bytes);
-                return BitConverter.ToString(hash).Replace("-", "").ToUpper();
+                
+                StringBuilder result = new StringBuilder();
+                for (int i = 0; i < hash.Length; i++)
+                {
+                    result.Append(hash[i].ToString("X2"));
+                }
+                return result.ToString().ToUpper();
             }
+        }
+
+        private string GenerateAutoSubmitForm(Dictionary<string, string> parameters)
+        {
+            var html = new StringBuilder();
+            html.Append($@"<form id=""ecpay-form"" method=""POST"" action=""{ApiUrl}"">");
+
+            foreach (var kvp in parameters)
+            {
+                html.Append($@"<input type=""hidden"" name=""{kvp.Key}"" value=""{kvp.Value}"" />");
+            }
+
+            html.Append("</form>");
+            html.Append(@"<script type=""text/javascript"">document.getElementById('ecpay-form').submit();</script>");
+
+            return html.ToString();
         }
     }
 }
-

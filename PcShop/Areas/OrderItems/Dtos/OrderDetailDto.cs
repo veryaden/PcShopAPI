@@ -21,8 +21,7 @@ namespace PcShop.Areas.OrderItems.Dtos
         public decimal CouponDiscount { get; set; }  // 純優惠券的折扣金額（排除了點數折抵）。
         public string CouponDiscountType { get; set; } //折扣類型（例如 percentage 或 fixed）。
         public decimal? CouponDiscountValue { get; set; } //折扣的數值（例如 10% 或 100元）。
-        public decimal Subtotal => Items?.Sum(i => i.PriceAtPurchase * i.Quantity) ?? 0;
-        public string StatusName { get; set; }
+        public string SelectedGateway { get; set; }
         public string SelectedPayment { get; set; }
         public List<OrderItemDto> Items { get; set; }
     }

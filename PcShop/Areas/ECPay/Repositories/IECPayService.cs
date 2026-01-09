@@ -1,11 +1,12 @@
 using PcShop.Areas.ECPay.Dtos;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace PcShop.Areas.ECPay.Repositories
 {
     public interface IECPayService
     {
-        Task<Dictionary<string, string>> GetECPayParameters(ECPayRequestDto request);
+        Task<string> GetECPayParameters(ECPayRequestDto request);
         Task<string> ProcessPaymentResult(IFormCollection payInfo);
     }
 }
-

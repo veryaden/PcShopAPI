@@ -6,6 +6,8 @@ using PcShop.Areas.Cart.Services;
 using PcShop.Areas.Checkout.Dtos;
 using PcShop.Areas.Checkout.Repositories;
 using PcShop.Areas.Checkout.Services;
+using PcShop.Areas.ECPay.Repositories;
+using PcShop.Areas.ECPay.Dtos;
 using System.Security.Claims;
 
 namespace PcShop.Areas.Checkout.Controllers
@@ -15,9 +17,11 @@ namespace PcShop.Areas.Checkout.Controllers
     public class CheckoutController : ControllerBase
     {
         private readonly ICheckoutService _checkoutService;
-        public CheckoutController(ICheckoutService checkoutService)
+        private readonly IECPayService _ecpayService;
+        public CheckoutController(ICheckoutService checkoutService, IECPayService ecpayService)
         {
             _checkoutService = checkoutService;
+            _ecpayService = ecpayService;
         }
 
         [HttpGet]
@@ -39,8 +43,9 @@ namespace PcShop.Areas.Checkout.Controllers
         [HttpPost]
         [Authorize]
         [Route("Create")]
-        public IActionResult CreateOrder([FromBody] CreateOrderDto dto)
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
         {
+            
             var userIdClaim = User.FindFirstValue("sub");
             if (string.IsNullOrEmpty(userIdClaim))
             {
@@ -55,6 +60,18 @@ namespace PcShop.Areas.Checkout.Controllers
                 if (orderId <= 0)
                 {
                     return BadRequest(new { success = false, message = "建立訂單失敗" });
+                }
+
+                // --- 整合金流邏輯 ---
+                if (dto.PaymentMethod == "ecpay")
+                {
+                    var ecpayRequest = new ECPayRequestDto 
+                    { 
+                        OrderId = orderId,
+                        TradeDesc = "PcShop Order Payment"
+                    };
+                    string htmlForm = await _ecpayService.GetECPayParameters(ecpayRequest);
+                    return Ok(new { success = true, orderId, htmlForm });
                 }
 
                 return Ok(new { success = true, orderId });
