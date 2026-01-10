@@ -6,7 +6,7 @@ using PcShop.Areas.Cart.Services;
 using PcShop.Areas.Checkout.Dtos;
 using PcShop.Areas.Checkout.Repositories;
 using PcShop.Areas.Checkout.Services;
-using PcShop.Areas.ECPay.Repositories;
+using PcShop.Areas.ECPay.Services;
 using PcShop.Areas.ECPay.Dtos;
 using System.Security.Claims;
 
@@ -16,9 +16,9 @@ namespace PcShop.Areas.Checkout.Controllers
     [ApiController]
     public class CheckoutController : ControllerBase
     {
-        private readonly ICheckoutService _checkoutService;
+        private readonly PcShop.Areas.Checkout.Services.ICheckoutService _checkoutService;
         private readonly IECPayService _ecpayService;
-        public CheckoutController(ICheckoutService checkoutService, IECPayService ecpayService)
+        public CheckoutController(PcShop.Areas.Checkout.Services.ICheckoutService checkoutService, IECPayService ecpayService)
         {
             _checkoutService = checkoutService;
             _ecpayService = ecpayService;
@@ -63,7 +63,7 @@ namespace PcShop.Areas.Checkout.Controllers
                 }
 
                 // --- 整合金流邏輯 ---
-                if (dto.PaymentMethod == "ecpay")
+                if (dto.paymentMethod == "ecpay")
                 {
                     var ecpayRequest = new ECPayRequestDto 
                     { 
@@ -75,19 +75,11 @@ namespace PcShop.Areas.Checkout.Controllers
                 }
 
                 return Ok(new { success = true, orderId });
-                //int orderId = _checkoutService.CreateOrder(userId, dto);
-                //return Ok(new { success = true, orderId = orderId });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { success = false, message = ex.Message });
             }
-
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex); // ⭐ 一定要加
-            //    return BadRequest(new { success = false, message = ex.Message });
-            //}
         }
     }
 }
