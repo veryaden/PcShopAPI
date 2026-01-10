@@ -158,4 +158,34 @@ public class ProductsController : ControllerBase
             Message = "成功取得 SKU 列表"
         });
     }
+    
+    // 取得最新6筆商品
+    [HttpGet("latest")]
+    public async Task<IActionResult> GetLatestProducts(int limit = 6)
+    {
+        var products = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.ProductImages)
+            .Include(p => p.ProductReviews)
+            .Where(p => p.Status == 1) // 只抓上架商品
+            .OrderByDescending(p => p.CreatedAt) // 用 CreatedAt 排最新
+            .Take(limit) // 只抓前 N 筆
+            .Select(p => new ProductListDto
+            {
+                Id = p.ProductId,
+                Name = p.ProductName,
+                Category = p.Category != null ? p.Category.CategoryName : "",
+                Price = p.BasePrice,
+                Rating = p.ProductReviews.Any() ? p.ProductReviews.Average(r => r.Rating) : 0,
+                ImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault().ImageUrl : ""
+            })
+            .ToListAsync();
+
+        return Ok(new ApiResponse<List<ProductListDto>>
+        {
+            Data = products,
+            TotalItems = products.Count,
+            Message = "成功取得最新商品"
+        });
+    }
 }
