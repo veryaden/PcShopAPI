@@ -16,6 +16,21 @@ namespace PcShop.Areas.Users.Controllers
         {
             _bus = bus;
         }
+        private int GetUserIdOrThrow()
+        {
+            var idStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(idStr))
+                idStr = User.FindFirstValue("sub");
+
+            if (string.IsNullOrEmpty(idStr))
+                throw new UnauthorizedAccessException("Token 缺少 userId claim");
+
+            if (!int.TryParse(idStr, out var userId))
+                throw new UnauthorizedAccessException("userId 非數字");
+
+            return userId;
+        }
 
         // 需求 3: 普通使用者登入
         [HttpPost("login")]
@@ -59,7 +74,8 @@ namespace PcShop.Areas.Users.Controllers
             try
             {
                 // 必須使用 async/await
-                int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                int userId = GetUserIdOrThrow(); // ⭐ 用同一套邏輯
+
                 await _bus.CompleteProfileAsync(userId, dto);
                 return Ok(new { message = "資料更新成功" });
             }
