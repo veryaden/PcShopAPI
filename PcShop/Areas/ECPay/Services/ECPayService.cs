@@ -18,9 +18,13 @@ namespace PcShop.Areas.ECPay.Services
         private readonly IConfiguration _configuration;
 
         // 綠界公開測試帳號參數
-        private const string MerchantId = "2000132";
-        private const string HashKey = "5294y06JbISpM5x9";
-        private const string HashIV = "v77hoKGq4kWxNNIS";
+        //private const string MerchantId = "2000132";
+        //private const string HashKey = "5294y06JbISpM5x9";
+        //private const string HashIV = "v77hoKGq4kWxNNIS";
+        //private const string ApiUrl = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5";
+        private const string MerchantId = "3002607";
+        private const string HashKey = "pwFHCqoQZGmho4w6";
+        private const string HashIV = "EkRm7iFT261dpevs";
         private const string ApiUrl = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5";
 
         public ECPayService(IOrderRepository orderRepo, IPaymentRepository paymentRepo, IConfiguration configuration)
@@ -69,10 +73,10 @@ namespace PcShop.Areas.ECPay.Services
                 { "TotalAmount", order.TotalAmount.ToString("0") },
                 { "TradeDesc", request.TradeDesc ?? "PcShop_Order_Payment" },
                 { "ItemName", string.IsNullOrEmpty(itemName) ? "PcShop_Goods" : itemName },
-                { "ReturnURL", _configuration["FrontendUrl"] ?? "https://9rgpr49q-7001.asse.devtunnels.ms" + "/api/ECPay/Callback" },
+                { "ReturnURL", _configuration["ECPay:ReturnURL"] ?? "https://9rgpr49q-7001.asse.devtunnels.ms/api/ECPay/Callback" },
                 { "ChoosePayment", request.ChoosePayment ?? "ALL" },
                 { "EncryptType", "1" },
-                { "ClientBackURL", "http://localhost:4200/cart" },
+                { "ClientBackURL", $"{_configuration["FrontendUrl"] ?? "http://localhost:4200"}/home" },
             };
 
             // 5. 計算 CheckMacValue
@@ -122,7 +126,7 @@ namespace PcShop.Areas.ECPay.Services
 
                 if (rtnCode == "1")
                 {
-                    await _orderRepo.UpdateOrderStatusAsync(log.OrderId, 1);
+                    await _orderRepo.UpdateOrderStatusAsync(log.OrderId, 2);
                 }
             }
 

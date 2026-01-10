@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using PcShop.Areas.ECPay.Dtos;
-using PcShop.Areas.ECPay.Repositories;
+using PcShop.Areas.ECPay.Services;
 using Microsoft.AspNetCore.Http;
 
 namespace PcShop.Areas.ECPay.Controllers
@@ -53,12 +53,6 @@ namespace PcShop.Areas.ECPay.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
-    }
-
-    // 簡單的 DTO，用來接前端傳來的 OrderId
-    public class GetPaymentParamsDto
-    {
-        public int OrderId { get; set; }
     }
 }
 
