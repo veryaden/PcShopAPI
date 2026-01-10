@@ -14,10 +14,10 @@ namespace PcShop.Areas.OrderItems.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<OrderItemDto>> GetOrderItemsAsync(int orderId) //多載
+        public async Task<IEnumerable<OrderItemDto>> GetOrderItemsAsync(int orderId, int userId) 
         {
             var items = await _context.OrderItems
-                .Where(oi => oi.OrderId == orderId)
+                .Where(oi => oi.OrderId == orderId && oi.Order.UserId == userId)
                 .Select(oi => new OrderItemDto
                 {
                     OrderItemId = oi.OrderItemId,
@@ -40,16 +40,21 @@ namespace PcShop.Areas.OrderItems.Services
             return items;
         }
 
-        public async Task<OrderDetailDto> GetOrderDetailAsync(int orderId)
+        public async Task<OrderDetailDto> GetOrderDetailAsync(int orderId, int userId)
         {
             var order = await _context.Orders
-                .Where(o => o.OrderId == orderId)
+                .Where(o => o.OrderId == orderId && o.UserId == userId)
                 .Select(o => new OrderDetailDto
                 {
                     OrderId = o.OrderId,
                     OrderNo = o.OrderNo,
                     TotalAmount = o.TotalAmount,
                     OrderStatus = o.OrderStatus,
+                    StatusName = o.OrderStatus == 1 ? "待付款" :
+                         o.OrderStatus == 0 ? "待付款" :
+                         o.OrderStatus == 2 ? "配送中" :
+                         o.OrderStatus == 3 ? "已完成" : "未知",
+                    SelectedPayment = o.SelectedPayment,
                     CreateDate = o.CreateDate,
                     ShippingFee = o.ShippingFee,
                     UsedPoints = o.UsedPoints,
@@ -66,6 +71,7 @@ namespace PcShop.Areas.OrderItems.Services
                     CouponDiscount = o.DiscountAmount - o.UsedPoints,
                     CouponDiscountType = o.UserCoupon != null ? o.UserCoupon.Coupon.DiscountType : null,
                     CouponDiscountValue = o.UserCoupon != null ? (decimal?)o.UserCoupon.Coupon.DiscountValue : null,
+                    SelectedGateway = o.SelectedGateway,
                     Items = o.OrderItems.Select(oi => new OrderItemDto
                     {
                         OrderItemId = oi.OrderItemId,

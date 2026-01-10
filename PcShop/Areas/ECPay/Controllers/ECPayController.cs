@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 using PcShop.Areas.ECPay.Dtos;
-using PcShop.Areas.ECPay.Repositories;
+using PcShop.Areas.ECPay.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace PcShop.Areas.ECPay.Controllers
 {
+    [Area("ECPay")]
     [Route("api/[controller]")]
     [ApiController]
     public class ECPayController : ControllerBase
@@ -16,20 +19,39 @@ namespace PcShop.Areas.ECPay.Controllers
             _ecpayService = ecpayService;
         }
 
-        //有動這個Dto 但不確定是不是這樣改
-        [HttpPost("GetPaymentParams")]
-        public async Task<IActionResult> GetPaymentParams([FromBody] ECPayRequestDto request)
-        {
-            var parameters = await _ecpayService.GetECPayParameters(request);
-            return Ok(parameters);
-        }
-
+        /// <summary>
+        /// 綠界付款回傳結果 (Server-side)
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("Callback")]
-        public async Task<IActionResult> Callback()
+        public async Task<IActionResult> Callback([FromForm] IFormCollection collection)
         {
-            var result = await _ecpayService.ProcessPaymentResult(Request.Form);
+            // 在此處處理綠界回傳的付款結果
+            // 比對 CheckMacValue 後更新資料庫訂單狀態
+            var result = await _ecpayService.ProcessPaymentResult(collection);
             return Content(result);
+        }
+        [HttpPost("GetPaymentParams")]
+        public async Task<IActionResult> GetPaymentParams([FromBody] GetPaymentParamsDto request)
+        {
+            try
+            {
+                // 這裡重複利用你之前寫好的 Service 邏輯
+                var ecpayRequest = new ECPayRequestDto
+                {
+                    OrderId = request.OrderId,
+                    TradeDesc = "補繳費用或重新付款"
+                };
 
+                // 產生 HTML 表單
+                string htmlForm = await _ecpayService.GetECPayParameters(ecpayRequest);
+
+                return Ok(new { success = true, htmlForm });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
     }
 }

@@ -2,7 +2,7 @@ using PcShop.Areas.ECPay.Dtos;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
-namespace PcShop.Areas.ECPay.Repositories
+namespace PcShop.Areas.ECPay.Services
 {
     public interface IECPayService
     {

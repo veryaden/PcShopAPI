@@ -4,7 +4,7 @@ namespace PcShop.Areas.OrderItems.Repositories
 {
     public interface IOrderItemsService
     {
-        Task<IEnumerable<OrderItemDto>> GetOrderItemsAsync(int orderId);
-        Task<OrderDetailDto> GetOrderDetailAsync(int orderId);
+        Task<IEnumerable<OrderItemDto>> GetOrderItemsAsync(int orderId, int userId);
+        Task<OrderDetailDto> GetOrderDetailAsync(int orderId, int userId);
     }
 }

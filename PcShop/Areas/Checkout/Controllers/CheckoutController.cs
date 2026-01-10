@@ -6,6 +6,8 @@ using PcShop.Areas.Cart.Services;
 using PcShop.Areas.Checkout.Dtos;
 using PcShop.Areas.Checkout.Repositories;
 using PcShop.Areas.Checkout.Services;
+using PcShop.Areas.ECPay.Services;
+using PcShop.Areas.ECPay.Dtos;
 using System.Security.Claims;
 
 namespace PcShop.Areas.Checkout.Controllers
@@ -14,10 +16,12 @@ namespace PcShop.Areas.Checkout.Controllers
     [ApiController]
     public class CheckoutController : ControllerBase
     {
-        private readonly ICheckoutService _checkoutService;
-        public CheckoutController(ICheckoutService checkoutService)
+        private readonly PcShop.Areas.Checkout.Services.ICheckoutService _checkoutService;
+        private readonly IECPayService _ecpayService;
+        public CheckoutController(PcShop.Areas.Checkout.Services.ICheckoutService checkoutService, IECPayService ecpayService)
         {
             _checkoutService = checkoutService;
+            _ecpayService = ecpayService;
         }
 
         [HttpGet]
@@ -39,8 +43,9 @@ namespace PcShop.Areas.Checkout.Controllers
         [HttpPost]
         [Authorize]
         [Route("Create")]
-        public IActionResult CreateOrder([FromBody] CreateOrderDto dto)
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
         {
+            
             var userIdClaim = User.FindFirstValue("sub");
             if (string.IsNullOrEmpty(userIdClaim))
             {
@@ -57,20 +62,24 @@ namespace PcShop.Areas.Checkout.Controllers
                     return BadRequest(new { success = false, message = "建立訂單失敗" });
                 }
 
+                // --- 整合金流邏輯 ---
+                if (dto.paymentMethod == "ecpay")
+                {
+                    var ecpayRequest = new ECPayRequestDto 
+                    { 
+                        OrderId = orderId,
+                        TradeDesc = "PcShop Order Payment"
+                    };
+                    string htmlForm = await _ecpayService.GetECPayParameters(ecpayRequest);
+                    return Ok(new { success = true, orderId, htmlForm });
+                }
+
                 return Ok(new { success = true, orderId });
-                //int orderId = _checkoutService.CreateOrder(userId, dto);
-                //return Ok(new { success = true, orderId = orderId });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { success = false, message = ex.Message });
             }
-
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex); // ⭐ 一定要加
-            //    return BadRequest(new { success = false, message = ex.Message });
-            //}
         }
     }
 }

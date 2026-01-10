@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace PcShop.Areas.OrderItems.Dtos
 {
@@ -8,6 +9,7 @@ namespace PcShop.Areas.OrderItems.Dtos
         public string OrderNo { get; set; }
         public decimal TotalAmount { get; set; }
         public int OrderStatus { get; set; }
+        public string StatusName { get; set; }
         public DateTime CreateDate { get; set; }
         public decimal ShippingFee { get; set; }
         public int UsedPoints { get; set; }
@@ -21,6 +23,8 @@ namespace PcShop.Areas.OrderItems.Dtos
         public decimal CouponDiscount { get; set; }  // 純優惠券的折扣金額（排除了點數折抵）。
         public string CouponDiscountType { get; set; } //折扣類型（例如 percentage 或 fixed）。
         public decimal? CouponDiscountValue { get; set; } //折扣的數值（例如 10% 或 100元）。
+        public string SelectedGateway { get; set; }
+        public string SelectedPayment { get; set; }
         public List<OrderItemDto> Items { get; set; }
     }
 }

@@ -2,17 +2,17 @@
 {
     public class CreateOrderDto
     {
-        public int ShippingMethodId { get; set; }
-        public string ShippingAddress { get; set; }
-        public string ReceiverName { get; set; }
-        public string ReceiverPhone { get; set; }
+        public int shippingMethodId { get; set; }
+        public string shippingAddress { get; set; }
+        public string receiverName { get; set; }
+        public string receiverPhone { get; set; }
 
         //public string SelectedGateway { get; set; }
         //public string SelectedPayment { get; set; }
-        public string ShippingMethod { get; set; }
-        public string PaymentMethod { get; set; }
+        public string shippingMethod { get; set; }
+        public string paymentMethod { get; set; }
 
-        public int? UserCouponId { get; set; }
-        public int UsePoints { get; set; }
+        public int? userCouponId { get; set; }
+        public int usePoints { get; set; }
     }
 }

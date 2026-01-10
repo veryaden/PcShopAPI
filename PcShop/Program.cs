@@ -25,7 +25,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using PcShop.Areas.Cart.Repositories;
 using PcShop.Areas.Cart.Services;
-using PcShop.Areas.Checkout.Repositories;
 using PcShop.Areas.Checkout.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using PcShop.Areas.ECPay.Repositories;
@@ -132,8 +131,9 @@ builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IAdService, AdService>();
 
 // ECPay Services
-builder.Services.AddScoped<IECPayService, ECPayService>();
+builder.Services.AddScoped<PcShop.Areas.ECPay.Services.IECPayService, ECPayService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
