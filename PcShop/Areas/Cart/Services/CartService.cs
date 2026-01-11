@@ -42,7 +42,7 @@ namespace PcShop.Areas.Cart.Services
         public bool UpdateCart(int userId, CartItemModel model)
         {
             var query = _context.CartItems
-                .Where(o => o.Cart.UserId == userId && o.Skuid == model.CartItemId)
+                .Where(o => o.Cart.UserId == userId && o.CartItemId == model.CartItemId)
                 .FirstOrDefault();
 
             if (query == null)
