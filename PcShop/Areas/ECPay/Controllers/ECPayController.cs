@@ -25,7 +25,7 @@ namespace PcShop.Areas.ECPay.Controllers
         /// <returns></returns>
         [HttpPost("Callback")]
         public async Task<IActionResult> Callback([FromForm] IFormCollection collection)
-        {
+       {
             // 在此處處理綠界回傳的付款結果
             // 比對 CheckMacValue 後更新資料庫訂單狀態
             var result = await _ecpayService.ProcessPaymentResult(collection);
