@@ -37,7 +37,7 @@ namespace PcShop.Areas.Users.Data
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(7),
+                expires: DateTime.UtcNow.AddMinutes(60),
                 signingCredentials: creds
             );
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -65,7 +65,7 @@ namespace PcShop.Areas.Users.Data
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(10),
+                expires: DateTime.Now.AddMinutes(60),
                 signingCredentials: creds
             );
 
