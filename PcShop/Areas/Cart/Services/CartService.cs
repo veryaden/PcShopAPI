@@ -172,22 +172,36 @@ namespace PcShop.Areas.Cart.Services
                 FinalTotal = Math.Round(cartTotal - discountAmount, 0, MidpointRounding.AwayFromZero)
             };
         }
-        public UserCouponDto GetCouponsData(string couponsCode)  //有人手把手教學指出來
+        public UserCouponDto GetCouponsData(string couponsCode, int userId)  //有人手把手教學指出來
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
-            var query = _context.Coupons.Where(c => c.CouponCode == couponsCode && 
-                    c.IsActive && c.ExpirationDate >= today && c.MaxUses > 0)
-                .Select(c => new UserCouponDto()
-                {                  
-                    CouponCode = c.CouponCode,
-                    Name = c.CouponCode, // Using CouponCode as Name for now
-                    DiscountType = c.DiscountType,
-                    DiscountValue = c.DiscountValue,
-                    MinOrderAmount = c.MinOrderAmount,
-                    IsActive = c.IsActive
-                }).FirstOrDefault();
+            //var query = _context.Coupons.Where(c => c.CouponCode == couponsCode && 
+            //        c.IsActive && c.ExpirationDate >= today && c.MaxUses > 0 )
+            //    .Select(c => new UserCouponDto()
+            //    {                  
+            //        CouponCode = c.CouponCode,
+            //        Name = c.CouponCode, // Using CouponCode as Name for now
+            //        DiscountType = c.DiscountType,
+            //        DiscountValue = c.DiscountValue,
+            //        MinOrderAmount = c.MinOrderAmount,
+            //        IsActive = c.IsActive
+            //    }).FirstOrDefault();
 
-            return query;
+            var coupons = _context.UserCoupons
+                .Where(uc => uc.UserId == userId && !uc.IsUsed && uc.Coupon.IsActive && uc.Coupon.ExpirationDate >= today && uc.Coupon.CouponCode == couponsCode)
+                .Select(uc => new UserCouponDto
+                {
+                    UserCouponId = uc.UserCouponId,
+                    CouponCode = uc.Coupon.CouponCode,
+                    Name = uc.Coupon.CouponCode, // Using CouponCode as Name for now
+                    DiscountType = uc.Coupon.DiscountType,
+                    DiscountValue = uc.Coupon.DiscountValue,
+                    MinOrderAmount = uc.Coupon.MinOrderAmount,
+                    IsActive = uc.Coupon.IsActive
+                })
+                .FirstOrDefault();
+
+            return coupons;
         }
 
         public UserPointDto GetUserPoints(int userId)

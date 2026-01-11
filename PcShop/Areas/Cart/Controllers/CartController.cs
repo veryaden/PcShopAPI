@@ -114,7 +114,13 @@ namespace PcShop.Areas.Cart.Controllers
         [Route("Coupons/{couponsCode}")]
         public IActionResult GetCoupons(string couponsCode)
         {
-            var coupons = _cartService.GetCouponsData(couponsCode);
+            var userIdClaim = User.FindFirstValue("sub");
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized();
+            }
+            int userId = int.Parse(userIdClaim);
+            var coupons = _cartService.GetCouponsData(couponsCode, userId);
             return Ok(coupons);
         }
 

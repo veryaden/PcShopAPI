@@ -11,7 +11,7 @@ namespace PcShop.Areas.Cart.Repositories
 
         List<UserCouponDto> GetCoupons(int userId);
         CouponValidationDto ValidateCoupon(int userId, int userCouponId);
-        UserCouponDto GetCouponsData(string couponsCode);
+        UserCouponDto GetCouponsData(string couponsCode, int userId);  //有新增int userId
         
         // 新增點數功能
         UserPointDto GetUserPoints(int userId);

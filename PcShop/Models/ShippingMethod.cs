@@ -16,4 +16,6 @@ public partial class ShippingMethod
     public string LogisticsType { get; set; }
 
     public string LogisticsSubType { get; set; }
+
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

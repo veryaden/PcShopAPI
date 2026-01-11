@@ -194,6 +194,7 @@ namespace PcShop.Areas.Checkout.Services
                         TotalAmount = subtotal + shippingFee - couponDiscount - pointsToUse,
                         OrderStatus = 1, // 1 是待付款
                         CreateDate = DateTime.Now,
+                        OrderItems = new List<OrderItem>(),
                         UserCouponId = dto.userCouponId
                     };
 
@@ -235,7 +236,8 @@ namespace PcShop.Areas.Checkout.Services
                     {
                         var pointPackets = _context.GamePoints
                             .Where(p => p.UserId == userId && p.Status == 1 && (p.ExpiredAt == null || p.ExpiredAt > now))
-                            .OrderBy(p => p.ExpiredAt ?? DateTime.MaxValue)
+                            //.OrderBy(p => p.ExpiredAt ?? DateTime.MaxValue)
+                            .OrderBy(p => p.ExpiredAt)
                             .ToList();
 
                         foreach (var packet in pointPackets)

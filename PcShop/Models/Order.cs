@@ -84,6 +84,8 @@ public partial class Order
 
     public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; } = new List<PaymentTransaction>();
 
+    public virtual ShippingMethod ShippingMethod { get; set; }
+
     public virtual UserProfile User { get; set; }
 
     public virtual UserCoupon UserCoupon { get; set; }

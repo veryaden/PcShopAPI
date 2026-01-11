@@ -2,7 +2,7 @@
 {
     public class CreateOrderDto
     {
-        public int shippingMethodId { get; set; }
+        public int? shippingMethodId { get; set; }
         public string shippingAddress { get; set; }
         public string receiverName { get; set; }
         public string receiverPhone { get; set; }
