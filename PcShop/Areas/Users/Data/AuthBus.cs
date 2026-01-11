@@ -180,7 +180,7 @@ namespace PcShop.Areas.Users.Data
             // 去 Oauth 表查這個 UserId 有沒有紀錄
             var oauthProfile = await _oauthData.GetByUserId(user.UserId);
 
-            if (oauthProfile != null)
+            if (oauthProfile != null && string.IsNullOrWhiteSpace(user.PasswordHash))
             {
                 // 如果查到了，代表他是用 Google (或其他) 登入的
                 // 視你的需求，如果你想「強制」他回去用 Google 登入，就丟出例外：

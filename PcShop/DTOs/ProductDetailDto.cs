@@ -9,7 +9,8 @@ public class ProductDetailDto
 
 	// ===== 價格與狀態 =====
 	public decimal Price { get; set; }
-	public int Status { get; set; }              // 0 下架 / 1 上架
+    public decimal? SalePrice { get; set; }
+    public int Status { get; set; }              // 0 下架 / 1 上架
 	public DateTime? OnShelfAt { get; set; }
 
 	// ===== 商品描述 =====

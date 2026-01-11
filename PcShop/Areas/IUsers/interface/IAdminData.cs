@@ -15,7 +15,7 @@ namespace PcShop.Areas.IUsers.Interface
         Task<int> GetTotalMembersAsync();
         Task<decimal> GetYearlyRevenueAsync(int year);
         Task<int> GetMonthOrdersAsync(int year, int month);
-        Task<decimal> GetAvgOrderAmountAsync();
+        Task<decimal> GetAvgOrderAmountAsync(int year);
         Task<List<MonthlyRevenueDto>> GetMonthlyRevenueAsync(int year);
     }
 }

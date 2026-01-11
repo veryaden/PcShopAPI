@@ -74,9 +74,9 @@ namespace PcShop.Areas.Users.Data
             => _context.Orders
                 .CountAsync(o => o.CreateDate.Year == year && o.CreateDate.Month == month);
 
-        public async Task<decimal> GetAvgOrderAmountAsync()
+        public async Task<decimal> GetAvgOrderAmountAsync(int year)
             => await _context.Orders
-                .Where(o => o.OrderStatus == Convert.ToInt32(OrderStatus.Completed))
+                .Where(o => o.OrderStatus == Convert.ToInt32(OrderStatus.Completed) && o.CreateDate.Year == year)
                 .AverageAsync(o => (decimal?)o.TotalAmount) ?? 0;
 
         public async Task<List<MonthlyRevenueDto>> GetMonthlyRevenueAsync(int year)

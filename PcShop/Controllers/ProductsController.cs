@@ -69,6 +69,9 @@ public class ProductsController : ControllerBase
                 Name = p.ProductName,
                 Category = p.Category != null ? p.Category.CategoryName : "",
                 Price = p.BasePrice,
+                SalePrice = p.ProductSkus.Any()
+                ? p.BasePrice + p.ProductSkus.Min(s => s.PriceAdjustment)
+                : p.BasePrice,
                 Rating = p.ProductReviews.Any() ? p.ProductReviews.Average(r => r.Rating) : 0,
                 ImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault().ImageUrl : ""
             })
@@ -92,6 +95,7 @@ public class ProductsController : ControllerBase
             .Include(p => p.Category)
             .Include(p => p.ProductImages)
             .Include(p => p.ProductReviews)
+            .Include(p => p.ProductSkus) 
             .FirstOrDefaultAsync(p => p.ProductId == id && p.Status == 1);
 
         if (product == null)
@@ -102,19 +106,29 @@ public class ProductsController : ControllerBase
             });
         }
 
-        var images = product.ProductImages != null
-            ? product.ProductImages.Select(i => i.ImageUrl).ToList()
-            : new List<string>();
+        var images = product.ProductImages?
+            .Select(i => i.ImageUrl)
+            .ToList() ?? new List<string>();
+
+        decimal salePrice = product.BasePrice;
+
+        if (product.ProductSkus != null && product.ProductSkus.Any())
+        {
+            salePrice = product.BasePrice + product.ProductSkus.Max(s => s.PriceAdjustment);
+        }
 
         var dto = new ProductDetailDto
         {
             Id = product.ProductId,
             Name = product.ProductName,
-            Category = product.Category != null ? product.Category.CategoryName : "",
+            Category = product.Category?.CategoryName ?? "",
             Price = product.BasePrice,
+            SalePrice = salePrice,
             Description = product.FullDescription ?? "",
             WarrantyInfo = product.WarrantyInfo ?? "",
-            Rating = product.ProductReviews.Any() ? product.ProductReviews.Average(r => r.Rating) : 0,
+            Rating = product.ProductReviews.Any()
+                ? product.ProductReviews.Average(r => r.Rating)
+                : 0,
             Images = images
         };
 
@@ -156,6 +170,40 @@ public class ProductsController : ControllerBase
         {
             Data = skus,
             Message = "成功取得 SKU 列表"
+        });
+    }
+    
+    // 取得最新6筆商品
+    [HttpGet("latest")]
+    public async Task<IActionResult> GetLatestProducts(int limit = 6)
+    {
+        var products = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.ProductImages)
+            .Include(p => p.ProductReviews)
+            .Where(p => p.Status == 1) // 只抓上架商品
+            .OrderByDescending(p => p.CreatedAt) // 用 CreatedAt 排最新
+            .Take(limit) // 只抓前 N 筆
+            .Select(p => new ProductListDto
+            {
+                Id = p.ProductId,
+                Name = p.ProductName,
+                Category = p.Category != null ? p.Category.CategoryName : "",
+                Price = p.BasePrice,
+                SalePrice = p.ProductSkus.Any()
+                ? p.BasePrice + p.ProductSkus.Min(s => s.PriceAdjustment)
+                : p.BasePrice,
+
+                Rating = p.ProductReviews.Any() ? p.ProductReviews.Average(r => r.Rating) : 0,
+                ImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault().ImageUrl : ""
+            })
+            .ToListAsync();
+
+        return Ok(new ApiResponse<List<ProductListDto>>
+        {
+            Data = products,
+            TotalItems = products.Count,
+            Message = "成功取得最新商品"
         });
     }
 }
