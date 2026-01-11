@@ -25,6 +25,10 @@ public class OrderDetailsDTO
     public decimal ShippingFee { get; set; }
     public decimal DiscointAmount { get; set; } 
     public int UsedPoints { get; set; }
+    public string ReceiverName { get; set; }
+    public string ShippingMethodName { get; set; }
+    public string ShippingAddress { get; set; }
+    public string ReceiverPhone { get; set; }
     public List<OrderItemDto> Items { get; set; } = new();
 }
 public class OrderItemDto

@@ -65,6 +65,10 @@ namespace PcShop.Areas.Users.Data
                 ShippingFee = order.ShippingFee,
                 DiscointAmount = order.DiscountAmount,
                 UsedPoints = order.UsedPoints,
+                ReceiverPhone = order.ReceiverPhone,
+                ReceiverName = order.User.FullName,
+                ShippingAddress = order.ShippingAddress,
+                ShippingMethodName = order.ShippingMethod.Name,
                 Items = order.OrderItems.Select(oi =>
                 {
                     var product = oi.Sku.Product;

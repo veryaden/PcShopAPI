@@ -469,6 +469,11 @@ public partial class ExamContext : DbContext
                 .HasComment("下單用戶ID")
                 .HasColumnName("UserID");
 
+            entity.HasOne(d => d.ShippingMethod).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.ShippingMethodId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Orders_ShippingMethods");
+
             entity.HasOne(d => d.UserCoupon).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserCouponId)
                 .HasConstraintName("FK_Orders_UserCoupons");

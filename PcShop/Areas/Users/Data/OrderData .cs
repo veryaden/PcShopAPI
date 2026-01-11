@@ -52,6 +52,8 @@ namespace PcShop.Areas.Users.Data
             .ThenInclude(oi => oi.Sku)
                 .ThenInclude(s => s.Product)
                     .ThenInclude(p => p.ProductImages)
+                    .Include(o => o.ShippingMethod)
+                    .Include(o => o.User)
         .FirstOrDefaultAsync(o =>
             o.OrderId == orderId &&
             o.UserId == userId);
