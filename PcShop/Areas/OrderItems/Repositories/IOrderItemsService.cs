@@ -6,5 +6,7 @@ namespace PcShop.Areas.OrderItems.Repositories
     {
         Task<IEnumerable<OrderItemDto>> GetOrderItemsAsync(int orderId, int userId);
         Task<OrderDetailDto> GetOrderDetailAsync(int orderId, int userId);
+
+        Task<bool> CancelOrderAsync(int orderId, int userId);
     }
 }

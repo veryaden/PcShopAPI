@@ -94,5 +94,22 @@ namespace PcShop.Areas.OrderItems.Services
 
             return order;
         }
+
+        public async Task<bool> CancelOrderAsync(int orderId, int userId)
+        {
+            var query = await _context.Orders.Where(o => o.UserId == userId && o.OrderId == orderId).FirstOrDefaultAsync();
+
+            if(query != null) 
+            {
+                query.OrderStatus = 3;
+                _context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+          
+        }
     }
 }

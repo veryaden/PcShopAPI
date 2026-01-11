@@ -46,5 +46,16 @@ namespace PcShop.Areas.OrderItems.Controllers
             if (detail == null) return NotFound();
             return Ok(detail);
         }
+
+        [HttpPost("cancelOrder/{orderId}")]
+        public async Task<ActionResult<bool>> CancelOrder(int orderId)
+        {
+            int userId = GetUserId();
+            if (userId == 0) return Unauthorized();
+
+            var data = await _orderItemsService.CancelOrderAsync(orderId, userId);
+            if (data == null) return NotFound();
+            return Ok(data);
+        }
     }
 }

@@ -62,7 +62,9 @@ namespace PcShop.Areas.Users.Data
                 Status = ((OrderStatus)order.OrderStatus).ToString(),
                 CreateDate = order.CreateDate,
                 TotalAmount = order.TotalAmount,
-
+                ShippingFee = order.ShippingFee,
+                DiscointAmount = order.DiscountAmount,
+                UsedPoints = order.UsedPoints,
                 Items = order.OrderItems.Select(oi =>
                 {
                     var product = oi.Sku.Product;
