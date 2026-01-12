@@ -116,36 +116,41 @@ namespace PcShop.Controllers.Admin
         }
 
         // -------------------
-        // 更新商品
+        // 安全更新商品
         // -------------------
         [HttpPut("{id}")]
         [Consumes("application/json")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] AdminProductDto dto)
         {
-            var product = await _context.Products.FindAsync(id);
+            // 1. 找商品
+            var product = await _context.Products
+                .Include(p => p.ProductImages) // 一併抓圖片
+                .FirstOrDefaultAsync(p => p.ProductId == id);
+
             if (product == null) return NotFound();
 
+            // 2. 更新必要欄位（不動 CategoryId）
             product.ProductName = dto.ProductName;
-            product.CategoryId = dto.CategoryId;
             product.BasePrice = dto.BasePrice;
             product.Status = dto.Status;
             product.FullDescription = dto.FullDescription;
             product.WarrantyInfo = dto.WarrantyInfo;
             product.UpdateTime = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
-
-            // 更新或新增單圖
+            // 3. 更新或新增主圖
             if (!string.IsNullOrEmpty(dto.ImageUrl))
             {
-                var existingImage = await _context.ProductImages
-                    .Where(pi => pi.ProductId == id && pi.IsMainOrNot == 1)
-                    .FirstOrDefaultAsync();
+                var mainImage = product.ProductImages
+                    .FirstOrDefault(pi => pi.IsMainOrNot == 1);
 
-                if (existingImage != null)
-                    existingImage.ImageUrl = dto.ImageUrl;
+                if (mainImage != null)
+                {
+                    // 已有主圖 → 更新 URL
+                    mainImage.ImageUrl = dto.ImageUrl;
+                }
                 else
                 {
+                    // 沒有主圖 → 新增
                     _context.ProductImages.Add(new ProductImage
                     {
                         ProductId = id,
@@ -153,9 +158,10 @@ namespace PcShop.Controllers.Admin
                         IsMainOrNot = 1
                     });
                 }
-
-                await _context.SaveChangesAsync();
             }
+
+            // 4. 儲存變更
+            await _context.SaveChangesAsync();
 
             return Ok();
         }
