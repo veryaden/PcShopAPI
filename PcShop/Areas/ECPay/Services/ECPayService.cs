@@ -76,6 +76,7 @@ namespace PcShop.Areas.ECPay.Services
                 { "ItemName", string.IsNullOrEmpty(itemName) ? "PcShop_Goods" : itemName },
                 { "ReturnURL", _configuration["ECPay:ReturnURL"] ?? "https://9rgpr49q-7001.asse.devtunnels.ms/api/ECPay/Callback" },
                 { "ChoosePayment", request.ChoosePayment ?? "ALL" },
+                //{ "ChoosePayment", "Credit" },
                 { "EncryptType", "1" },
                 { "ClientBackURL", $"{_configuration["FrontendUrl"] ?? "http://localhost:4200"}/home" },
             };
