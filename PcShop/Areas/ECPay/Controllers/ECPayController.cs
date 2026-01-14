@@ -3,7 +3,8 @@ using System;
 using System.Threading.Tasks;
 using PcShop.Areas.ECPay.Dtos;
 using PcShop.Areas.ECPay.Services;
-using Microsoft.AspNetCore.Http;
+
+using Microsoft.AspNetCore.Authorization;
 
 namespace PcShop.Areas.ECPay.Controllers
 {
@@ -24,6 +25,7 @@ namespace PcShop.Areas.ECPay.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("Callback")]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Callback([FromForm] IFormCollection collection)
        {
             // 在此處處理綠界回傳的付款結果
@@ -58,6 +60,9 @@ namespace PcShop.Areas.ECPay.Controllers
         /// 前端請求綠界地圖表單
         /// </summary>
         [HttpPost("LogisticsMap")]
+        [IgnoreAntiforgeryToken]
+        [AllowAnonymous]
+        //[Consumes("application/x-www-form-urlencoded")]
         public async Task<IActionResult> LogisticsMap([FromBody] LogisticsMapRequestDto request)
         {
             try
@@ -75,6 +80,9 @@ namespace PcShop.Areas.ECPay.Controllers
         /// 綠界地圖選擇完畢後的回傳 (Server-side)
         /// </summary>
         [HttpPost("LogisticsCallback")]
+        [IgnoreAntiforgeryToken]
+        [AllowAnonymous]
+        [Consumes("application/x-www-form-urlencoded")]
         public IActionResult LogisticsCallback([FromForm] IFormCollection collection)
         {
             // 綠界選完門市後會由 User 的 Browser POST 過來
