@@ -131,7 +131,7 @@ namespace PcShop.Areas.OrderItems.Services
                 CreateDate = order.CreateDate,
                 TotalAmount = order.TotalAmount,
                 ShippingFee = order.ShippingFee,
-                DiscointAmount = order.DiscountAmount,
+                DiscointAmount = order.DiscountAmount - order.UsedPoints,
                 UsedPoints = order.UsedPoints,
                 ReceiverPhone = order.ReceiverPhone,
                 ReceiverName = order.User.FullName,

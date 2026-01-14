@@ -65,8 +65,8 @@ namespace PcShop.Areas.Users.Data
             return status switch
             {
                 OrderStatus.Pending => "待付款",
-                OrderStatus.Shipping => "配送中",
-                OrderStatus.Completed => "已完成",
+                OrderStatus.Shipping => "已完成",
+                OrderStatus.Completed => "已取消",
                 _ => "處理中"
             };
         }
@@ -76,8 +76,8 @@ namespace PcShop.Areas.Users.Data
             return status switch
             {
                 OrderStatus.Pending => "pending",
-                OrderStatus.Shipping => "shipping",
-                OrderStatus.Completed => "completed",
+                OrderStatus.Shipping => "completed",
+                OrderStatus.Completed => "cancelled",
                 _ => "pending"
             };
         }

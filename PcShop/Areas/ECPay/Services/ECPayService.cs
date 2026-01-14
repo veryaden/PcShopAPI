@@ -26,6 +26,7 @@ namespace PcShop.Areas.ECPay.Services
         private const string HashKey = "pwFHCqoQZGmho4w6";
         private const string HashIV = "EkRm7iFT261dpevs";
         private const string ApiUrl = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5";
+        private const string LogisticsMapUrl = "https://logistics-stage.ecpay.com.tw/Express/map";
 
         public ECPayService(IOrderRepository orderRepo, IPaymentRepository paymentRepo, IConfiguration configuration)
         {
@@ -96,7 +97,22 @@ namespace PcShop.Areas.ECPay.Services
             await _paymentRepo.CreatePaymentLog(log);
 
             // 7. 生成 HTML Form
-            return GenerateAutoSubmitForm(dict);
+            return GenerateAutoSubmitForm(dict, ApiUrl);
+        }
+
+        public async Task<string> GetLogisticsMapForm(LogisticsMapRequestDto request)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                { "MerchantID", MerchantId },
+                { "LogisticsType", request.LogisticsType },
+                { "LogisticsSubType", request.LogisticsSubType },
+                { "IsCollection", request.IsCollection },
+                { "ServerReplyURL", _configuration["ECPay:LogisticsReplyURL"] ?? "https://9rgpr49q-7001.asse.devtunnels.ms/api/ECPay/LogisticsCallback" },
+                { "ExtraData", request.ExtraData ?? "" }
+            };
+
+            return GenerateAutoSubmitForm(dict, LogisticsMapUrl);
         }
 
         public async Task<string> ProcessPaymentResult(IFormCollection payInfo)
@@ -166,10 +182,10 @@ namespace PcShop.Areas.ECPay.Services
         }
 
         // ⭐ 修正：這個方法必須在 Class 內部
-        private string GenerateAutoSubmitForm(Dictionary<string, string> parameters)
+        private string GenerateAutoSubmitForm(Dictionary<string, string> parameters, string url)
         {
             var html = new StringBuilder();
-            html.Append($@"<form id=""ecpay-form"" method=""POST"" action=""{ApiUrl}"">");
+            html.Append($@"<form id=""ecpay-form"" method=""POST"" action=""{url}"">");
 
             foreach (var kvp in parameters)
             {

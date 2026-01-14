@@ -31,7 +31,7 @@ namespace PcShop.Areas.ECPay.Controllers
             var result = await _ecpayService.ProcessPaymentResult(collection);
             return Content(result);
         }
-        [HttpPost("GetPaymentParams")]
+         [HttpPost("GetPaymentParams")]
         public async Task<IActionResult> GetPaymentParams([FromBody] GetPaymentParamsDto request)
         {
             try
@@ -52,6 +52,63 @@ namespace PcShop.Areas.ECPay.Controllers
             {
                 return BadRequest(new { success = false, message = ex.Message });
             }
+        }
+
+        /// <summary>
+        /// 前端請求綠界地圖表單
+        /// </summary>
+        [HttpPost("LogisticsMap")]
+        public async Task<IActionResult> LogisticsMap([FromBody] LogisticsMapRequestDto request)
+        {
+            try
+            {
+                string htmlForm = await _ecpayService.GetLogisticsMapForm(request);
+                return Ok(new { success = true, htmlForm });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// 綠界地圖選擇完畢後的回傳 (Server-side)
+        /// </summary>
+        [HttpPost("LogisticsCallback")]
+        public IActionResult LogisticsCallback([FromForm] IFormCollection collection)
+        {
+            // 綠界選完門市後會由 User 的 Browser POST 過來
+            var storeId = collection["CVSStoreID"];
+            var storeName = collection["CVSStoreName"];
+            var storeAddress = collection["CVSAddress"];
+            var extraData = collection["ExtraData"];
+
+            // 建議在 HTML 中加入 <meta charset="utf-8"> 並明確指定 Content-Type 的 charset
+            var script = $@"
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset=""utf-8"">
+        </head>
+        <body>
+            <script>
+                const storeData = {{
+                    storeId: '{storeId}',
+                    storeName: '{storeName}',
+                    storeAddress: '{storeAddress}',
+                    extraData: '{extraData}'
+                }};
+                // 透過 postMessage 將門市資訊傳回原本的結帳頁面
+                if (window.opener) {{
+                    window.opener.postMessage(storeData, '*');
+                }}
+                window.close();
+            </script>
+        </body>
+        </html>";
+
+            // 重點：在第二個參數明確指定 charset=utf-8
+            return Content(script, "text/html; charset=utf-8");
         }
     }
 }
