@@ -63,13 +63,17 @@ namespace PcShop.Areas.Checkout.Controllers
                 }
 
                 // --- 整合金流邏輯 ---
-                if (dto.paymentMethod == "ecpay")
+                if (!string.IsNullOrWhiteSpace(dto.paymentMethod))
                 {
                     var ecpayRequest = new ECPayRequestDto 
                     { 
                         OrderId = orderId,
                         TradeDesc = "PcShop Order Payment"
                     };
+                    if (dto.paymentMethod == "Credit")
+                    {
+                        ecpayRequest.ChoosePayment = dto.paymentMethod;
+                    }
                     string htmlForm = await _ecpayService.GetECPayParameters(ecpayRequest);
                     return Ok(new { success = true, orderId, htmlForm });
                 }

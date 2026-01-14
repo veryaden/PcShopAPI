@@ -74,7 +74,8 @@ namespace PcShop.Areas.ECPay.Services
                 { "TotalAmount", order.TotalAmount.ToString("0") },
                 { "TradeDesc", request.TradeDesc ?? "PcShop_Order_Payment" },
                 { "ItemName", string.IsNullOrEmpty(itemName) ? "PcShop_Goods" : itemName },
-                { "ReturnURL", _configuration["ECPay:ReturnURL"] ?? "https://9rgpr49q-7001.asse.devtunnels.ms/api/ECPay/Callback" },
+                //{ "ReturnURL", _configuration["ECPay:ReturnURL"] ?? "https://91dnz7ll-7001.asse.devtunnels.ms/api/ECPay/Callback" },
+                { "ReturnURL", "https://91dnz7ll-7001.asse.devtunnels.ms/api/ECPay/Callback" },
                 { "ChoosePayment", request.ChoosePayment ?? "ALL" },
                 { "EncryptType", "1" },
                 { "ClientBackURL", $"{_configuration["FrontendUrl"] ?? "http://localhost:4200"}/home" },
@@ -108,7 +109,7 @@ namespace PcShop.Areas.ECPay.Services
                 { "LogisticsType", request.LogisticsType },
                 { "LogisticsSubType", request.LogisticsSubType },
                 { "IsCollection", request.IsCollection },
-                { "ServerReplyURL", _configuration["ECPay:LogisticsReplyURL"] ?? "https://9rgpr49q-7001.asse.devtunnels.ms/api/ECPay/LogisticsCallback" },
+                { "ServerReplyURL", _configuration["ECPay:LogisticsReplyURL"] ?? "https://91dnz7ll-7001.asse.devtunnels.ms/api/ECPay/LogisticsCallback" },
                 { "ExtraData", request.ExtraData ?? "" }
             };
 
