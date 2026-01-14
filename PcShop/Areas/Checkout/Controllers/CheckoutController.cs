@@ -70,12 +70,13 @@ namespace PcShop.Areas.Checkout.Controllers
                         OrderId = orderId,
                         TradeDesc = "PcShop Order Payment"
                     };
-                    if (dto.paymentMethod == "Credit")
+                    //if (dto.paymentMethod == "Credit")
+                    if (dto.paymentMethod == "ecpay")
                     {
-                        ecpayRequest.ChoosePayment = dto.paymentMethod;
-                    }
-                    string htmlForm = await _ecpayService.GetECPayParameters(ecpayRequest);
-                    return Ok(new { success = true, orderId, htmlForm });
+                      //ecpayRequest.ChoosePayment = dto.paymentMethod;
+                      string htmlForm = await _ecpayService.GetECPayParameters(ecpayRequest);
+                      return Ok(new { success = true, orderId, htmlForm });
+                    }                  
                 }
 
                 return Ok(new { success = true, orderId });
