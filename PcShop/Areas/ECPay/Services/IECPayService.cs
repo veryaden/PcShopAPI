@@ -4,9 +4,10 @@ using System.Threading.Tasks;
 
 namespace PcShop.Areas.ECPay.Services
 {
-    public interface IECPayService
+     public interface IECPayService
     {
         Task<string> GetECPayParameters(ECPayRequestDto request);
         Task<string> ProcessPaymentResult(IFormCollection payInfo);
+        Task<string> GetLogisticsMapForm(LogisticsMapRequestDto request);
     }
 }

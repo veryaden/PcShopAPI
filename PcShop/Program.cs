@@ -71,9 +71,10 @@ builder.Services.AddScoped<ISendEmailService, SendEmailServices>();
 builder.Services.AddScoped<IMemberCenterData, MeMberCenterData>();
 builder.Services.AddScoped<IMemberCenterService, MemberCenterService>();
 builder.Services.AddScoped<IOrderData, OrderData>();
-builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<PcShop.Areas.IUsers.Interface.IOrderService, PcShop.Areas.Users.Data.OrderService>(); 
 builder.Services.AddScoped<IAdminData, AdminData>();
 builder.Services.AddScoped<IAdminServices, AdminServices>();
+builder.Services.AddScoped<PcShop.Areas.OrderItems.Repositories.IOrderService, PcShop.Areas.OrderItems.Services.OrderService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddAuthorization();
 

@@ -37,7 +37,7 @@ namespace PcShop.Areas.OrderItems.Controllers
         }
 
         [HttpGet("detail/{orderId}")]
-        public async Task<ActionResult<OrderDetailDto>> GetOrderDetail(int orderId)
+        public async Task<IActionResult> GetOrderDetail(int orderId)
         {
             int userId = GetUserId();
             if (userId == 0) return Unauthorized();
